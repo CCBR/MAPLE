@@ -31,7 +31,7 @@ samtools view -b -F 260 ${output}.assembled.hg19.bam > ${output}.mapped.hg19.bam
 bedtools bamtobed -i ${output}.mapped.hg19.bam > ${output}.mapped.hg19.bed
 
 ## Make histogram of fragment lengths ###########
-Rscript hist2.r ${output}.mapped.hg19.bed ${output}.mapped.hg19.length_hist.csv
+Rscript hist.r ${output}.mapped.hg19.bed ${output}.mapped.hg19.length_hist.csv
 
 
 ## OPTIONAL ###########

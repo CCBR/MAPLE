@@ -36,7 +36,7 @@ Rscript hist.r ${output}.mapped.hg19.bed ${output}.mapped.hg19.length_hist.csv
 
 ## OPTIONAL ###########
 # bedtools -a ${output}.mapped.hg19.bed -b intervals_of_interests.bed > ${output}.selected.hg19.bed
-
+# awk '{ if ($3-$2 >= 140 && $3-$2 <= 160) print $0}' ${output}.selected.hg19.bed > ${output}.selected.hg19.140-160.bed 
 
 ## PART II ###########
 
@@ -44,7 +44,7 @@ limit=$5
 max_dist=$6
 
 ## Find fragment centers (DYADs) and make histogram (Occurrences) ###########
-python3 WeigthedDYADposition.py ${output}.selected.hg19.bed ${output}.DYADs
+python3 WeigthedDYADposition.py ${output}.selected.hg19.140-160.bed ${output}.DYADs
 sort -k1,1 -k2n,2 ${output}.DYADs > ${output}.DYADs.sorted
 python Uniq_Position.py ${output}.DYADs.sorted ${output}.DYADs.hist
 

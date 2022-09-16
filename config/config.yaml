@@ -7,3 +7,10 @@ workdir: "WORKDIR"
 # sampleName	path_to_R1_fastq	path_to_R2_fastq
 #
 samples: "WORKDIR/samples.tsv"
+
+#adaptor path
+adaptors:"/path/to/adaptors/TruSeq_and_nextera_adapters.fa"
+
+intervals_of_interest:"/path/to/intervals/intervals_of_interest.bed"
+
+species='hg19'

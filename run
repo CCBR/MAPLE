@@ -124,9 +124,10 @@ function init() {
 if [ -d $WORKDIR ];then err "Folder $WORKDIR already exists!"; fi
 mkdir -p $WORKDIR
 
-# copy config and samples files
+# copy config and samples manifests
 _set_config
 cp ${PIPELINE_HOME}/config/samples.tsv $WORKDIR/
+cp ${PIPELINE_HOME}/config/contrasts.tsv $WORKDIR/
 
 #create log and stats folders
 if [ ! -d $WORKDIR/logs ]; then 
@@ -136,6 +137,17 @@ if [ ! -d $WORKDIR/stats ];then
   mkdir -p $WORKDIR/stats;echo "Stats Dir: $WORKDIR/stats"
 fi
 
+# copy scripts 
+if [ ! -d $WORKDIR/scripts ]; then
+  mkdir -p $WORKDIR/scripts; echo "Scripts Dir: $WORKDIR/scripts"
+  cp ${PIPELINE_HOME}/workflow/scripts/* $WORKDIR/scripts
+fi
+
+# copy resources
+if [ ! -d $WORKDIR/resources ]; then
+  mkdir -p $WORKDIR/resources; echo "Resources Dir: $WORKDIR/resources"
+  cp ${PIPELINE_HOME}/resources/* $WORKDIR/resources
+fi
 echo "
 #################################################################
 #################################################################

@@ -136,14 +136,14 @@ if [ ! -d $WORKDIR/stats ];then
   mkdir -p $WORKDIR/stats;echo "Stats Dir: $WORKDIR/stats"
 fi
 
-cat < EOF
+echo "
 #################################################################
 #################################################################
 Done Initializing $WORKDIR. 
 You can now edit $WORKDIR/config.yaml and $WORKDIR/samples.tsv
 #################################################################
 #################################################################
-EOF
+"
 
 }
 
@@ -423,7 +423,6 @@ EOF
   sbatch ${WORKDIR}/submit_script.sbatch
 
   else # for unlock and dryrun 
-
 snakemake $1 -s $SNAKEFILE \
 --directory $WORKDIR \
 --use-envmodules \

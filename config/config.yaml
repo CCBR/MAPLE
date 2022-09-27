@@ -1,16 +1,19 @@
-## you probably need to change or comment/uncomment some of these
-#
-# The working dir... output will be in the results subfolder of the workdir
-workdir: "WORKDIR"
-#
-# tab delimited samples file ... should have the following 3 columns
-# sampleName	path_to_R1_fastq	path_to_R2_fastq
-#
-samples: "WORKDIR/samples.tsv"
+#########################################################################################
+#Folders and Paths REQUIRED
+#########################################################################################
+workdir: "WORKDIR" #output will be in the results subfolder of the workdir
+intervals_of_interest: "/path/to/intervals/intervals_of_interest.bed" #bed file with intervals of interest to subset data
 
-#adaptor path
-adaptors:"/path/to/adaptors/TruSeq_and_nextera_adapters.fa"
+# paths to manifest files
+samplemanifest: "WORKDIR/samples.tsv"
+contrastmanifest: "WORKDIR/contrasts.tsv"
 
-intervals_of_interest:"/path/to/intervals/intervals_of_interest.bed"
+########################################################################################
+#user parameters
+#########################################################################################
+species: "hg19"
 
-species='hg19'
+#########################################################################################
+# reference files
+#########################################################################################
+adapters: "/data/CCBR_Pipeliner/ccbr1214/adapters/TruSeq_and_nextera_adapters.fa"

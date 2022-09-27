@@ -1,3 +1,5 @@
-sampleName	path_to_R1_fastq	path_to_R2_fastq
-Sample1	<path to sample1 R1 fastq>	<path to sample1 R2 fastq>
-Sample2	<path to sample2 R1 fastq>	<path to sample2 R2 fastq>
+sampleName	type	path_to_R1_fastq	path_to_R2_fastq
+Sample1	tumor	/path/to/sample1.R1.fastq.gz	/path/to/sample1.R2.fastq.gz
+Sample2	normal	/path/to/sample2.R1.fastq.gz	/path/to/sample2.R2.fastq.gz
+Sample3	tumor	/path/to/sample4.R1.fastq.gz	/path/to/sample4.R2.fastq.gz
+Sample4	normal	/path/to/sample3.R1.fastq.gz	/path/to/sample3.R2.fastq.gz

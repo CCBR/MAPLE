@@ -54,3 +54,15 @@ python ALU_DAC.py ${output}.DYADs.hist ${limit} ${max_dist} ${output}.DAC.csv
 
 
 
+###################################
+sh run --runmode=init --workdir=/data/sevillas2/ccbr1214/test
+
+
+# contrast manifest can have additional contrasts
+## DEFAULT is two
+contrast1   contrast2
+Sample1 Sample2
+
+## three contrasts
+contrast1   contrast2   contrast3
+Sample1 Sample2 Sample3

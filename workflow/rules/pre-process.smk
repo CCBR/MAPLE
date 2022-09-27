@@ -1,5 +1,6 @@
-rule trim_adaptors:
+rule trim_adapters:
     '''
+    Read samples.tsv to determine fastq files, trim adapters
     '''
     input:
         f1=join(fq_dir,'{sample_id}_R1.fastq.gz'),
@@ -7,17 +8,17 @@ rule trim_adaptors:
     envmodules:
         TOOLS["cutadapt"]["version"]
     container: config["masterdocker"]    
-    threads: getthreads("trim_adaptors")
+    threads: getthreads("trim_adapters")
     params:
-        rname="trim_adaptors",
-        adaptors=config[adaptors]
+        rname="trim_adapters",
+        adapters=config[adapters]
     output:
         f1=join(RESULTSDIR,'trim','{sample_id}_R1.trimmed.fastq.gz'),
         f2=join(RESULTSDIR,'trim','{sample_id}_R1.trimmed.fastq.gz')
     shell:
     """
         #cutadapt -j 32 -b file:TruSeq_and_nextera_adapters.fa -B file:TruSeq_and_nextera_adapters.fa --trim-n -m 50 -o ${output}_R1.trimmed.fastq.gz -p ${output}_R2.trimmed.fastq.gz ${path}/${R1} ${path}/${R2}
-        cutadapt -j 32 -b file:{params.adaptors} -B file:{params.adaptors} --trim-n -m 50 -o {output.f1} -p {output.f2} {input.f1} {input.f2}
+        cutadapt -j 32 -b file:{params.adapters} -B file:{params.adapters} --trim-n -m 50 -o {output.f1} -p {output.f2} {input.f1} {input.f2}
     """
 
 rule assembly:
@@ -25,8 +26,8 @@ rule assembly:
     Assemble read pairs 
     '''
     input:
-        f1=rules.trim_adaptors.output.f1,
-        f2=rules.trim_adaptors.output.f2
+        f1=rules.trim_adapters.output.f1,
+        f2=rules.trim_adapters.output.f2
     envmodules:
         TOOLS["pear"]["version"]
     container: config["masterdocker"]    

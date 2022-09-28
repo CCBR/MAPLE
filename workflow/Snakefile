@@ -2,7 +2,6 @@ from os.path import join
 include: join("rules","init.smk")
 include: join("rules","pre-process.smk")
 
-print(config["run_select_bed"])
 # if the parameter for selected bed is chosen then a selected_bed and bed file are required outputs
 if (config["run_select_bed"]=="Y"):
     bed_file_list=[expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.selected.bed'),sample_id=SAMPLES), expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.bed'),sample_id=SAMPLES)]

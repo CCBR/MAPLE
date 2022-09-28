@@ -152,7 +152,7 @@ if [ ! -d $WORKDIR/resources ]; then
 fi
 
 # prep for logs
-if [ ! -d $WORKDIR/logs ]; then
+if [ ! -d $WORKDIR/logs/dryrun ]; then
   mkdir -p $WORKDIR/logs/dryrun; echo "Log Dir: $WORKDIR/logs"
 fi
 echo "
@@ -400,7 +400,7 @@ function run() {
 # snakemake command below
   cat > ${WORKDIR}/submit_script.sbatch << EOF
 #!/bin/bash
-#SBATCH --job-name="CCBRPipeline"
+#SBATCH --job-name="ccbr1214"
 #SBATCH --mem=10g
 #SBATCH --partition="norm"
 #SBATCH --time=96:00:00

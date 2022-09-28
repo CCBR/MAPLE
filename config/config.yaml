@@ -2,7 +2,6 @@
 #Folders and Paths REQUIRED
 #########################################################################################
 workdir: "WORKDIR" #output will be in the results subfolder of the workdir
-intervals_of_interest: "/path/to/intervals/intervals_of_interest.bed" #bed file with intervals of interest to subset data
 
 # paths to manifest files
 samplemanifest: "WORKDIR/samples.tsv"
@@ -13,7 +12,10 @@ contrastmanifest: "WORKDIR/contrasts.tsv"
 #########################################################################################
 species: "hg19"
 
+run_select_bed: "Y" # whether to run pipeline for selected_bed file
+intervals_of_interest: "/path/to/intervals/intervals_of_interest.bed" #bed file with intervals of interest to subset data
+
 #########################################################################################
 # reference files
 #########################################################################################
-adapters: "/data/CCBR_Pipeliner/ccbr1214/adapters/TruSeq_and_nextera_adapters.fa"
+adaptors: "/data/CCBR_Pipeliner/ccbr1214/adapters/TruSeq_and_nextera_adapters.fa"

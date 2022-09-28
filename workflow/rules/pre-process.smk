@@ -106,7 +106,7 @@ rule hist_frags:
 
 rule select_bed:
     '''
-    create select bed - FLAG FOR IF
+    create select bed, if required
     check access for intervals bed 
 
     # bedtools -a ${output}.mapped.hg19.bed -b intervals_of_interests.bed > ${output}.selected.hg19.bed

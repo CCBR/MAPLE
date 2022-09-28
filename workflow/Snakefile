@@ -1,6 +1,7 @@
 from os.path import join
 include: join("rules","init.smk")
 include: join("rules","pre-process.smk")
+include: join("rules","post-process.smk")
 
 # if the parameter for selected bed is chosen then a selected_bed and bed file are required outputs
 if (config["run_select_bed"]=="Y"):
@@ -9,7 +10,6 @@ if (config["run_select_bed"]=="Y"):
 else:
     bed_file_list=expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.bed'),sample_id=SAMPLES)
     histogram_file_list=[expand(join(RESULTSDIR,'histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
-
     
 localrules: all
 rule all:
@@ -23,4 +23,7 @@ rule all:
         expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.bam'),sample_id=SAMPLES),
         expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.bed'),sample_id=SAMPLES),
         bed_file_list,
-        histogram_file_list
+        histogram_file_list,
+        expand(join(RESULTSDIR,'dyads','{sample_id}.sorted.DYADs'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'dyads','{sample_id}.DYADs.hist'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'dyads','{sample_id}.DAC.csv'),sample_id=SAMPLES),

@@ -150,12 +150,12 @@ with open(TOOLSYAML) as f:
 #########################################################
 ## Load cluster.json
 try:
-    CLUSTERJSON = config["clusterjson"]
+    CLUSTERYAML = config["clusteryaml"]
 except KeyError:
-    CLUSTERJSON = join(WORKDIR,"resources","cluster.json")
-check_readaccess(CLUSTERJSON)
-with open(CLUSTERJSON) as json_file:
-    CLUSTER = json.load(json_file)
+    CLUSTERYAML = join(WORKDIR,"resources","cluster.yaml")
+check_readaccess(CLUSTERYAML)
+with open(CLUSTERYAML) as yaml_file:
+    CLUSTER = yaml.load(yaml_file, Loader=yaml.FullLoader)
 
 ## Create lambda functions to allow a way to insert read-in values
 ## as rule directives
@@ -183,7 +183,7 @@ print("# Working dir :",WORKDIR)
 print("# Results dir :",RESULTSDIR)
 print("# Scripts dir :",SCRIPTSDIR)
 print("# Resources dir :",RESOURCESDIR)
-print("# Cluster JSON :",CLUSTERJSON)
+print("# Cluster YAML :",CLUSTERYAML)
 
 #GENOME=config["genome"]
 #INDEXDIR=config[GENOME]["indexdir"]

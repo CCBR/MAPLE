@@ -15,6 +15,8 @@ species: "hg19"
 run_select_bed: "Y" # whether to run pipeline for selected_bed file
 intervals_of_interest: "WORKDIR/intervals_of_interest.bed" #bed file with intervals of interest to subset data
 
+limit: 1000000
+max_distance: 1500
 #########################################################################################
 # reference files
 #########################################################################################

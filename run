@@ -132,8 +132,8 @@ cp ${PIPELINE_HOME}/config/samples.tsv $WORKDIR/
 cp ${PIPELINE_HOME}/config/contrasts.tsv $WORKDIR/
 
 #create log and stats folders
-if [ ! -d $WORKDIR/logs ]; then 
-  mkdir -p $WORKDIR/logs;echo "Logs Dir: $WORKDIR/logs"
+if [ ! -d $WORKDIR/logs/$log_time ]; then 
+  mkdir -p $WORKDIR/logs/$log_time; echo "Logs Dir: $WORKDIR/logs"
 fi
 if [ ! -d $WORKDIR/stats ];then 
   mkdir -p $WORKDIR/stats;echo "Stats Dir: $WORKDIR/stats"
@@ -383,8 +383,8 @@ function run() {
   --latency-wait 120 \
   --configfile ${WORKDIR}/config.yaml \
   --cores all \
-  --stats ${WORKDIR}/snakemake.stats \
-  2>&1|tee ${WORKDIR}/snakemake.log
+  --stats ${WORKDIR}/logs/$log_time/snakemake.stats \
+  2>&1|tee ${WORKDIR}/logs/$log_time/snakemake.log
 
   if [ "$?" -eq "0" ];then
     snakemake -s $SNAKEFILE \
@@ -398,7 +398,7 @@ function run() {
   preruncleanup
 # if QOS is other than "global" and is supplied in the cluster.json file then add " --qos={cluster.qos}" to the 
 # snakemake command below
-  cat > ${WORKDIR}/submit_script.sbatch << EOF
+  cat > ${WORKDIR}/logs/$log_time/submit_script.sbatch << EOF
 #!/bin/bash
 #SBATCH --job-name="ccbr1214"
 #SBATCH --mem=10g
@@ -421,25 +421,25 @@ snakemake -s $SNAKEFILE \
 --latency-wait 120 \
 --configfile ${WORKDIR}/config.yaml \
 --cluster-config ${PIPELINE_HOME}/resources/cluster.yaml \
---cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {cluster.name} --output {cluster.output} --error {cluster.error}" \
+--cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {params.rname} --output $WORKDIR/logs/$log_time/{cluster.output} --error  $WORKDIR/logs/$log_time/{cluster.error}" \
 -j 500 \
 --rerun-incomplete \
 --keep-going \
---stats ${WORKDIR}/snakemake.stats \
-2>&1|tee ${WORKDIR}/snakemake.log
+--stats ${WORKDIR}/logs/$log_time/snakemake.stats \
+2>&1|tee ${WORKDIR}/logs/$log_time/snakemake.log
 
 if [ "\$?" -eq "0" ];then
   snakemake -s $SNAKEFILE \
   --directory $WORKDIR \
-  --report ${WORKDIR}/runslurm_snakemake_report.html \
+  --report ${WORKDIR}/logs/$log_time/runslurm_snakemake_report.html \
   --configfile ${WORKDIR}/config.yaml 
 fi
 
-bash <(curl https://raw.githubusercontent.com/CCBR/Tools/master/Biowulf/gather_cluster_stats.sh 2>/dev/null) ${WORKDIR}/snakemake.log > ${WORKDIR}/snakemake.log.HPC_summary.txt
+bash <(curl https://raw.githubusercontent.com/CCBR/Tools/master/Biowulf/gather_cluster_stats.sh 2>/dev/null) ${WORKDIR}/logs/$log_time/snakemake.log > ${WORKDIR}/logs/$log_time/snakemake.log.HPC_summary.txt
 
 EOF
 
-  sbatch ${WORKDIR}/submit_script.sbatch
+  sbatch ${WORKDIR}/logs/$log_time/submit_script.sbatch
   
   # for unlock and dryrun 
   else 
@@ -451,7 +451,7 @@ EOF
     --latency-wait 120 \
     --configfile ${WORKDIR}/config.yaml \
     --cluster-config ${PIPELINE_HOME}/resources/cluster.yaml \
-    --cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {cluster.name} --output {cluster.output} --error {cluster.error}" \
+    --cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {params.rname} --output $WORKDIR/logs/$log_time/{cluster.output} --error  $WORKDIR/logs/$log_time/{cluster.error}" \
     -j 500 \
     --rerun-incomplete \
     --scheduler greedy  \

@@ -14,13 +14,15 @@ module purge
 
 # setting python and snakemake versions
 PYTHON_VERSION="python/3.7"
-SNAKEMAKE_VERSION="snakemake/5.24.1"
+SNAKEMAKE_VERSION="snakemake/7.7.0"
 # set extra singularity bindings
 EXTRA_SINGULARITY_BINDS="/lscratch, /data/CCBR_Pipeliner/"
 SCRIPTNAME="$0"
 SCRIPTDIRNAME=$(readlink -f $(dirname $0))
 SCRIPTBASENAME=$(readlink -f $(basename $0))
 
+# set times
+log_time=`date +"%Y%m%d_%H%M"`
 
 function get_git_commitid_tag() {
 
@@ -147,6 +149,11 @@ fi
 if [ ! -d $WORKDIR/resources ]; then
   mkdir -p $WORKDIR/resources; echo "Resources Dir: $WORKDIR/resources"
   cp ${PIPELINE_HOME}/resources/* $WORKDIR/resources
+fi
+
+# prep for logs
+if [ ! -d $WORKDIR/logs ]; then
+  mkdir -p $WORKDIR/logs/dryrun; echo "Log Dir: $WORKDIR/logs"
 fi
 echo "
 #################################################################
@@ -433,21 +440,23 @@ bash <(curl https://raw.githubusercontent.com/CCBR/Tools/master/Biowulf/gather_c
 EOF
 
   sbatch ${WORKDIR}/submit_script.sbatch
-
-  else # for unlock and dryrun 
-snakemake $1 -s $SNAKEFILE \
---directory $WORKDIR \
---use-envmodules \
---printshellcmds \
---latency-wait 120 \
---configfile ${WORKDIR}/config.yaml \
---cluster-config ${PIPELINE_HOME}/config/cluster.json \
---cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {cluster.name} --output {cluster.output} --error {cluster.error}" \
--j 500 \
---rerun-incomplete \
---keep-going \
---stats ${WORKDIR}/snakemake.stats
-
+  
+  # for unlock and dryrun 
+  else 
+    snakemake $1 -s $SNAKEFILE \
+    --directory $WORKDIR \
+    --use-envmodules \
+    --printshellcmds \
+    --verbose \
+    --latency-wait 120 \
+    --configfile ${WORKDIR}/config.yaml \
+    --cluster-config ${PIPELINE_HOME}/config/cluster.json \
+    --cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {cluster.name} --output {cluster.output} --error {cluster.error}" \
+    -j 500 \
+    --rerun-incomplete \
+    --scheduler greedy  \
+    --keep-going \
+    --stats ${WORKDIR}/snakemake.stats | tee ${WORKDIR}/logs/dryrun/dryrun.${log_time}.log
   fi
 
 }

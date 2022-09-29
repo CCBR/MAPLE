@@ -14,8 +14,8 @@ rule trim_adaptors:
         rname="trim_adaptors",
         adaptors=config["adaptors"]
     output:
-        f1=join(RESULTSDIR,'trim','{sample_id}.R1.trimmed.fastq.gz'),
-        f2=join(RESULTSDIR,'trim','{sample_id}.R2.trimmed.fastq.gz')
+        f1=join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),
+        f2=join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz')
     shell:
         """
         cutadapt -j 32 -b file:{params.adaptors} -B file:{params.adaptors} --trim-n -m 50 -o {output.f1} -p {output.f2} {input.f1} {input.f2}
@@ -35,7 +35,7 @@ rule assembly:
     params:
         rname="assembly"
     output:
-        merged_fq=join(RESULTSDIR,'assembled','{sample_id}.assembled.fastq.gz')
+        merged_fq=join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz')
     shell:
         """
         tmp_dir="/lscratch/${{SLURMJOB}}"
@@ -74,9 +74,9 @@ rule alignment:
         rname="alignment",
         species=config['species']
     output:
-        bam=join(RESULTSDIR,'aligned','{sample_id}.assembled.bam'),
-        mapped_bam=join(RESULTSDIR,'aligned','{sample_id}.mapped.bam'),
-        bed=join(RESULTSDIR,'aligned','{sample_id}.mapped.bed')
+        bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.assembled.bam'),
+        mapped_bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.bam'),
+        bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed')
     shell:
         """
         bowtie2 -p 32 -x {params.species} -U {input.assembled} -S {output.bam}
@@ -98,7 +98,7 @@ rule hist_frags:
         rname="hist_frags_all",
         rscript=join(WORKDIR,"scripts","hist.r")
     output:
-        hist=join(RESULTSDIR,'histograms','{sample_id}.length_hist_all.csv')
+        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv')
     shell:
         """
         Rscript {params.rscript} {input.bed} {output.hist}
@@ -123,7 +123,7 @@ rule select_bed:
         rname="hist_frags",
         rscript=join(WORKDIR,"scripts","hist.r")
     output:
-        selected_bed=join(RESULTSDIR,'aligned','{sample_id}.mapped.selected.bed')
+        selected_bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed')
     shell:
         """
         tmp_dir="/lscratch/${{SLURMJOB}}"
@@ -153,7 +153,7 @@ rule selected_hist_frags:
         rname="hist_frags_select",
         rscript=join(WORKDIR,"scripts","hist.r")
     output:
-        hist=join(RESULTSDIR,'histograms','{sample_id}.length_hist_selected.csv')
+        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.csv')
     shell:
         """
         Rscript {params.rscript} {input.bed} {output.hist}

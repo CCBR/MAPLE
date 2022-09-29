@@ -1,8 +1,8 @@
 def get_dyad_input(wildcards):
     if (config["run_select_bed"]=="Y"):
-        dyad_input=join(RESULTSDIR,'aligned','{sample_id}.mapped.selected.bed')
+        dyad_input=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed')
     else:
-        dyad_input=join(RESULTSDIR,'aligned','{sample_id}.mapped.bed')
+        dyad_input=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed')
     return(dyad_input)
 
 rule dyad_analysis:
@@ -26,10 +26,10 @@ rule dyad_analysis:
         limit=config["limit"],
         max_d=config["max_distance"]
     output:
-        dyads=join(RESULTSDIR,'dyads','{sample_id}.DYADs'),
-        sorted=join(RESULTSDIR,'dyads','{sample_id}.sorted.DYADs'),
-        hist=join(RESULTSDIR,'dyads','{sample_id}.DYADs.hist'),
-        csv=join(RESULTSDIR,'dyads','{sample_id}.DAC.csv'),
+        dyads=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.DYADs'),
+        sorted=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.sorted.DYADs'),
+        hist=join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.DYADs.hist'),
+        csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.DAC.csv'),
     shell:
         """
         python3 {params.position_script} {input.bed} {output.dyads}

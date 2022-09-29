@@ -5,25 +5,24 @@ include: join("rules","post-process.smk")
 
 # if the parameter for selected bed is chosen then a selected_bed and bed file are required outputs
 if (config["run_select_bed"]=="Y"):
-    bed_file_list=[expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.selected.bed'),sample_id=SAMPLES), expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.bed'),sample_id=SAMPLES)]
-    histogram_file_list=[expand(join(RESULTSDIR,'histograms','{sample_id}.length_hist_selected.csv'),sample_id=SAMPLES), expand(join(RESULTSDIR,'histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
+    bed_file_list=[expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed'),sample_id=SAMPLES), expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed'),sample_id=SAMPLES)]
+    histogram_file_list=[expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.csv'),sample_id=SAMPLES), expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
 else:
-    bed_file_list=expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.bed'),sample_id=SAMPLES)
-    histogram_file_list=[expand(join(RESULTSDIR,'histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
+    bed_file_list=expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed'),sample_id=SAMPLES)
+    histogram_file_list=[expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
     
 localrules: all
 rule all:
     input: 
         expand(join(WORKDIR,"fastqs",'{sample_id}.R1.fastq.gz'),sample_id=SAMPLES),
         expand(join(WORKDIR,"fastqs",'{sample_id}.R2.fastq.gz'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'trim','{sample_id}.R1.trimmed.fastq.gz'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'trim','{sample_id}.R2.trimmed.fastq.gz'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'assembled','{sample_id}.assembled.fastq.gz'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'aligned','{sample_id}.assembled.bam'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.bam'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'aligned','{sample_id}.mapped.bed'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.assembled.bam'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.bam'),sample_id=SAMPLES),
         bed_file_list,
         histogram_file_list,
-        expand(join(RESULTSDIR,'dyads','{sample_id}.sorted.DYADs'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'dyads','{sample_id}.DYADs.hist'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'dyads','{sample_id}.DAC.csv'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.sorted.DYADs'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.DYADs.hist'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.DAC.csv'),sample_id=SAMPLES),

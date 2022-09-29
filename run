@@ -38,14 +38,16 @@ function get_git_commitid_tag() {
   echo -ne "$gid\t$tag"
 
 }
-
+echo "#################################################################
+#################################################################"
 PIPELINE_HOME=$(readlink -f $(dirname "$0"))
 echo "Pipeline Dir: $PIPELINE_HOME"
 SNAKEFILE="${PIPELINE_HOME}/workflow/Snakefile"
 echo "Snakefile: $SNAKEFILE"
 GIT_COMMIT_TAG=$(get_git_commitid_tag $PIPELINE_HOME)
 echo "Git Commit/Tag: $GIT_COMMIT_TAG"
-
+echo "#################################################################
+#################################################################"
 function usage_only() {
 
   # This script prints only the usage without any pre-amble
@@ -109,7 +111,7 @@ cat <<< "
 
 function _set_config() {
 
-sed -e "s/PIPELINE_HOME/${PIPELINE_HOME//\//\\/}/g" \
+  sed -e "s/PIPELINE_HOME/${PIPELINE_HOME//\//\\/}/g" \
     -e "s/WORKDIR/${WORKDIR//\//\\/}/g" \
     ${PIPELINE_HOME}/config/config.yaml > $WORKDIR/config.yaml
 
@@ -117,47 +119,47 @@ sed -e "s/PIPELINE_HOME/${PIPELINE_HOME//\//\\/}/g" \
 
 function init() {
 
-# This function initializes the workdir by:
-# 1. creating the working dir
-# 2. copying essential files like config.yaml and samples.tsv into the workdir
-# 3. setting up logs and stats folders
+  # This function initializes the workdir by:
+  # 1. creating the working dir
+  # 2. copying essential files like config.yaml and samples.tsv into the workdir
+  # 3. setting up logs and stats folders
 
-# create output folder
-if [ -d $WORKDIR ];then err "Folder $WORKDIR already exists!"; fi
-mkdir -p $WORKDIR
+  # create output folder
+  if [ -d $WORKDIR ];then err "Folder $WORKDIR already exists!"; fi
+  mkdir -p $WORKDIR
 
-#create directories
-dir_list=(logs stats scripts resources manifests)
-for pd in "${dir_list[@]}"; do 
-  if [[ ! -d $WORKDIR/$pd ]]; then 
-    mkdir -p $WORKDIR/$pd
-    echo "$pd Dir: $WORKDIR/$pd"
-  fi
-done
+  #create directories
+  dir_list=(logs stats scripts resources manifests)
+  for pd in "${dir_list[@]}"; do 
+    if [[ ! -d $WORKDIR/$pd ]]; then 
+      mkdir -p $WORKDIR/$pd
+      echo "$pd Dir: $WORKDIR/$pd"
+    fi
+  done
 
-dir_list=(logs/dryrun)
-for pd in "${dir_list[@]}"; do 
-  if [[ ! -d $WORKDIR/$pd ]]; then 
-    mkdir -p $WORKDIR/$pd
-    echo "$pd Dir: $WORKDIR/$pd"
-  fi
-done
+  dir_list=(logs/dryrun)
+  for pd in "${dir_list[@]}"; do 
+    if [[ ! -d $WORKDIR/$pd ]]; then 
+      mkdir -p $WORKDIR/$pd
+      echo "$pd Dir: $WORKDIR/$pd"
+    fi
+  done
 
-# copy configs, samples manifests, scripts, resources
-_set_config
-cp ${PIPELINE_HOME}/config/samples.tsv $WORKDIR/manifests
-cp ${PIPELINE_HOME}/config/contrasts.tsv $WORKDIR/manifests
-cp ${PIPELINE_HOME}/workflow/scripts/* $WORKDIR/scripts
-cp ${PIPELINE_HOME}/resources/* $WORKDIR/resources
+  # copy configs, samples manifests, scripts, resources
+  _set_config
+  cp ${PIPELINE_HOME}/config/samples.tsv $WORKDIR/manifests
+  cp ${PIPELINE_HOME}/config/contrasts.tsv $WORKDIR/manifests
+  cp ${PIPELINE_HOME}/workflow/scripts/* $WORKDIR/scripts
+  cp ${PIPELINE_HOME}/resources/* $WORKDIR/resources
 
-echo "
-#################################################################
-#################################################################
-Done Initializing $WORKDIR. 
-You can now edit $WORKDIR/config.yaml and $WORKDIR/manifests/samples.tsv
-#################################################################
-#################################################################
-"
+  echo "
+  #################################################################
+  #################################################################
+  Done Initializing $WORKDIR. 
+  You can now edit $WORKDIR/config.yaml and $WORKDIR/manifests/samples.tsv
+  #################################################################
+  #################################################################
+  "
 
 }
 
@@ -189,7 +191,7 @@ function reconfig(){
 
 function runcheck(){
 
-# Check "job-essential" files and load required modules
+  # Check "job-essential" files and load required modules
 
   check_essential_files
   module load $PYTHON_VERSION
@@ -199,7 +201,7 @@ function runcheck(){
 
 function dryrun() {
 
-# check essential files, load modules and do Dry-run
+  # check essential files, load modules and do Dry-run
 
   runcheck
   run "--dry-run"
@@ -208,8 +210,8 @@ function dryrun() {
 
 function unlock() {
 
-# check essential files, load modules and 
-# unlock the workdir if previous snakemake run ended abruptly
+  # check essential files, load modules and 
+  # unlock the workdir if previous snakemake run ended abruptly
 
   runcheck
   run "--unlock"
@@ -273,8 +275,8 @@ function printbinds(){
 
 function runlocal() {
 
-# If the pipeline is fired up on an interactive node (with sinteractive), 
-# this function runs the pipeline
+  # If the pipeline is fired up on an interactive node (with sinteractive), 
+  # this function runs the pipeline
 
   runcheck
   set_singularity_binds
@@ -286,7 +288,7 @@ function runlocal() {
 
 function runslurm() {
 
-# Submit the execution of the pipeline to the biowulf job scheduler (slurm)
+  # Submit the execution of the pipeline to the biowulf job scheduler (slurm)
 
   runcheck
   set_singularity_binds
@@ -425,7 +427,7 @@ EOF
 
 function reset() {
 
-# Delete the workdir and re-initialize it
+  # Delete the workdir and re-initialize it
 
   echo "Working Dir: $WORKDIR"
   if [ ! -d $WORKDIR ];then err "Folder $WORKDIR does not exist!";fi
@@ -439,7 +441,7 @@ function reset() {
 
 function main(){
 
-# Main function which parses all arguments
+  # Main function which parses all arguments
 
   if [ $# -eq 0 ]; then usage && exit 1; fi
 

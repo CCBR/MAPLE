@@ -4,8 +4,8 @@
 workdir: "WORKDIR" #output will be in the results subfolder of the workdir
 
 # paths to manifest files
-samplemanifest: "WORKDIR/samples.tsv"
-contrastmanifest: "WORKDIR/contrasts.tsv"
+samplemanifest: "WORKDIR/manifests/samples.tsv"
+contrastmanifest: "WORKDIR/manifests/contrasts.tsv"
 
 ########################################################################################
 #user parameters

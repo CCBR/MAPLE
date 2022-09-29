@@ -5,6 +5,8 @@ __default__:
     mem: 40g
     partition: ccr,norm
     time: 00-08:00:00
-    threads: 32
-    output: ${{SLURM_JOBID}}.%j.{params.rname}.{wildcards}.out
-    error: ${{SLURM_JOBID}}.%j.{params.rname}.{wildcards}.err
+    threads: 48
+    output: .%j.{params.rname}.{wildcards}.out
+    error: .%j.{params.rname}.{wildcards}.err
+    name: .{params.rname}.{wildcards}
+    

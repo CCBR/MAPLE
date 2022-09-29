@@ -2,7 +2,7 @@
 set -eo pipefail
 module purge
 
-# Author: Vishal Koparde, Ph.D.
+# Author: Vishal Koparde, Ph.D.; Samantha Chill, Ph.D.
 # CCBR, NCI
 # (c) 2021
 #
@@ -26,11 +26,11 @@ log_time=`date +"%Y%m%d_%H%M"`
 
 function get_git_commitid_tag() {
 
-# This function gets the latest git commit id and tag
-# @Input:
-#   @param1: PIPELINE_HOME folder which is a initialized git repo folder path
-# @Output:
-#   @param1: tab-delimited commit id and tag
+  # This function gets the latest git commit id and tag
+  # @Input:
+  #   @param1: PIPELINE_HOME folder which is a initialized git repo folder path
+  # @Output:
+  #   @param1: tab-delimited commit id and tag
 
   cd $1
   gid=$(git rev-parse HEAD)
@@ -48,44 +48,44 @@ echo "Git Commit/Tag: $GIT_COMMIT_TAG"
 
 function usage_only() {
 
-# This script prints only the usage without any pre-amble
+  # This script prints only the usage without any pre-amble
 
-cat << EOF
-#################################################################
-#################################################################
-USAGE:
-  bash ${SCRIPTNAME} -m/--runmode=<RUNMODE> -w/--workdir=<WORKDIR>
-Required Arguments:
-1.  RUNMODE: [Type: String] Valid options:
-    *) init : initialize workdir
-    *) run : run with slurm
-    *) reset : DELETE workdir dir and re-init it
-    *) dryrun : dry run snakemake to generate DAG
-    *) unlock : unlock workdir if locked by snakemake
-    *) runlocal : run without submitting to sbatch
-2.  WORKDIR: [Type: String]: Absolute or relative path to the 
-             output folder with write permissions.
-#################################################################
-#################################################################
-EOF
+  cat '''
+  #################################################################
+  #################################################################
+  USAGE:
+    bash ${SCRIPTNAME} -m/--runmode=<RUNMODE> -w/--workdir=<WORKDIR>
+  Required Arguments:
+  1.  RUNMODE: [Type: String] Valid options:
+      *) init : initialize workdir
+      *) run : run with slurm
+      *) reset : DELETE workdir dir and re-init it
+      *) dryrun : dry run snakemake to generate DAG
+      *) unlock : unlock workdir if locked by snakemake
+      *) runlocal : run without submitting to sbatch
+  2.  WORKDIR: [Type: String]: Absolute or relative path to the 
+              output folder with write permissions.
+  #################################################################
+  #################################################################
+  '''
 
 }
 
 function usage() { 
 
-# This function prints generic usage of the wrapper script.
-# @Input: None
-# @Output: Usage information about the script
+  # This function prints generic usage of the wrapper script.
+  # @Input: None
+  # @Output: Usage information about the script
 
-cat << EOF
-#################################################################
-#################################################################
-Running ${SCRIPTBASENAME} ...
-<Your Pipeline Short Name>.
-echo "Git Commit/Tag: $GIT_COMMIT_TAG"
-EOF
+  cat '''
+  #################################################################
+  #################################################################
+  Running ${SCRIPTBASENAME} ...
+  <Your Pipeline Short Name>.
+  echo "Git Commit/Tag: $GIT_COMMIT_TAG"
+  '''
 
-usage_only
+  usage_only
 
 }
 
@@ -126,40 +126,35 @@ function init() {
 if [ -d $WORKDIR ];then err "Folder $WORKDIR already exists!"; fi
 mkdir -p $WORKDIR
 
-# copy config and samples manifests
+#create directories
+dir_list=(logs stats scripts resources manifests)
+for pd in "${dir_list[@]}"; do 
+  if [[ ! -d $WORKDIR/$pd ]]; then 
+    mkdir -p $WORKDIR/$pd
+    echo "$pd Dir: $WORKDIR/$pd"
+  fi
+done
+
+dir_list=(logs/dryrun)
+for pd in "${dir_list[@]}"; do 
+  if [[ ! -d $WORKDIR/$pd ]]; then 
+    mkdir -p $WORKDIR/$pd
+    echo "$pd Dir: $WORKDIR/$pd"
+  fi
+done
+
+# copy configs, samples manifests, scripts, resources
 _set_config
-cp ${PIPELINE_HOME}/config/samples.tsv $WORKDIR/
-cp ${PIPELINE_HOME}/config/contrasts.tsv $WORKDIR/
+cp ${PIPELINE_HOME}/config/samples.tsv $WORKDIR/manifests
+cp ${PIPELINE_HOME}/config/contrasts.tsv $WORKDIR/manifests
+cp ${PIPELINE_HOME}/workflow/scripts/* $WORKDIR/scripts
+cp ${PIPELINE_HOME}/resources/* $WORKDIR/resources
 
-#create log and stats folders
-if [ ! -d $WORKDIR/logs/$log_time ]; then 
-  mkdir -p $WORKDIR/logs/$log_time; echo "Logs Dir: $WORKDIR/logs"
-fi
-if [ ! -d $WORKDIR/stats ];then 
-  mkdir -p $WORKDIR/stats;echo "Stats Dir: $WORKDIR/stats"
-fi
-
-# copy scripts 
-if [ ! -d $WORKDIR/scripts ]; then
-  mkdir -p $WORKDIR/scripts; echo "Scripts Dir: $WORKDIR/scripts"
-  cp ${PIPELINE_HOME}/workflow/scripts/* $WORKDIR/scripts
-fi
-
-# copy resources
-if [ ! -d $WORKDIR/resources ]; then
-  mkdir -p $WORKDIR/resources; echo "Resources Dir: $WORKDIR/resources"
-  cp ${PIPELINE_HOME}/resources/* $WORKDIR/resources
-fi
-
-# prep for logs
-if [ ! -d $WORKDIR/logs/dryrun ]; then
-  mkdir -p $WORKDIR/logs/dryrun; echo "Log Dir: $WORKDIR/logs"
-fi
 echo "
 #################################################################
 #################################################################
 Done Initializing $WORKDIR. 
-You can now edit $WORKDIR/config.yaml and $WORKDIR/samples.tsv
+You can now edit $WORKDIR/config.yaml and $WORKDIR/manifests/samples.tsv
 #################################################################
 #################################################################
 "
@@ -172,7 +167,7 @@ function check_essential_files() {
 # By default config.yaml and samples.tsv are considered essential files.
 
   if [ ! -d $WORKDIR ];then err "Folder $WORKDIR does not exist!"; fi
-  for f in config.yaml samples.tsv; do
+  for f in config.yaml manifests/samples.tsv; do
     if [ ! -f $WORKDIR/$f ]; then 
       err "Error: '${f}' file not found in workdir ... initialize first!"
     fi
@@ -242,7 +237,7 @@ function set_singularity_binds(){
   _exe_in_path dos2unix
   echo "$PIPELINE_HOME" > ${WORKDIR}/tmp1
   echo "$WORKDIR" >> ${WORKDIR}/tmp1
-  grep -o '\/.*' <(cat ${WORKDIR}/config.yaml ${WORKDIR}/samples.tsv)| \
+  grep -o '\/.*' <(cat ${WORKDIR}/config.yaml ${WORKDIR}/manifests/samples.tsv)| \
     dos2unix | \
     tr '\t' '\n' | \
     grep -v ' \|\/\/' | \
@@ -311,22 +306,20 @@ function _get_file_modtime() {
 
 function create_runinfo() {
 
-# Create a runinfo.yaml file in the WORKDIR
+  # Create a runinfo.yaml file in the WORKDIR
+  modtime=$(_get_file_modtime ${WORKDIR}/runinfo.yaml)
+  runinfo=${WORKDIR}/logs/$log_time/runinfo.yaml.${modtime}
 
-  if [ -f ${WORKDIR}/runinfo.yaml ];then
-    modtime=$(_get_file_modtime ${WORKDIR}/runinfo.yaml)
-    mv ${WORKDIR}/runinfo.yaml ${WORKDIR}/runinfo.yaml.${modtime}
-  fi
-  echo "Pipeline Dir: $PIPELINE_HOME" > ${WORKDIR}/runinfo.yaml
-  echo "Git Commit/Tag: $GIT_COMMIT_TAG" >> ${WORKDIR}/runinfo.yaml
+  echo "Pipeline Dir: $PIPELINE_HOME" > $runinfo
+  echo "Git Commit/Tag: $GIT_COMMIT_TAG" >> $runinfo
   userlogin=$(whoami)
   username=$(finger $userlogin|grep ^Login|awk -F"Name: " '{print $2}')
-  echo "Login: $userlogin" >> ${WORKDIR}/runinfo.yaml
-  echo "Name: $username" >> ${WORKDIR}/runinfo.yaml
+  echo "Login: $userlogin" >>  $runinfo
+  echo "Name: $username" >>  $runinfo
   g=$(groups)
-  echo "Groups: $g" >> ${WORKDIR}/runinfo.yaml
+  echo "Groups: $g" >> $runinfo
   d=$(date)
-  echo "Date/Time: $d" >> ${WORKDIR}/runinfo.yaml
+  echo "Date/Time: $d" >> $runinfo
 
 }
 
@@ -361,19 +354,29 @@ function preruncleanup() {
 
 }
 
+function create_logtime(){
+  # create time log
+  dir_list=(logs/$log_time)
+  for pd in "${dir_list[@]}"; do 
+    if [[ ! -d $WORKDIR/$pd ]]; then 
+      mkdir -p $WORKDIR/$pd
+    fi
+  done
+}
 
 function run() {
-# RUN function
-# argument1 can be:
-# 1. local or
-# 2. dryrun or
-# 3. unlock or
-# 4. slurm
+  # RUN function
+  # argument1 can be:
+  # 1. local or
+  # 2. dryrun or
+  # 3. unlock or
+  # 4. slurm
 
   if [ "$1" == "local" ];then
 
+  create_logtime
   preruncleanup
-
+  
   snakemake -s $SNAKEFILE \
   --directory $WORKDIR \
   --printshellcmds \
@@ -394,11 +397,12 @@ function run() {
   fi
 
   elif [ "$1" == "slurm" ];then
-  
-  preruncleanup
-# if QOS is other than "global" and is supplied in the cluster.json file then add " --qos={cluster.qos}" to the 
-# snakemake command below
-  cat > ${WORKDIR}/logs/$log_time/submit_script.sbatch << EOF
+    create_logtime
+    preruncleanup
+    
+    # if QOS is other than "global" and is supplied in the cluster.json file then add " --qos={cluster.qos}" to the 
+    # snakemake command below
+    cat > ${WORKDIR}/logs/$log_time/submit_script.sbatch << EOF
 #!/bin/bash
 #SBATCH --job-name="ccbr1214"
 #SBATCH --mem=10g
@@ -421,7 +425,7 @@ snakemake -s $SNAKEFILE \
 --latency-wait 120 \
 --configfile ${WORKDIR}/config.yaml \
 --cluster-config ${PIPELINE_HOME}/resources/cluster.yaml \
---cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {params.rname} --output $WORKDIR/logs/$log_time/{cluster.output} --error  $WORKDIR/logs/$log_time/{cluster.error}" \
+--cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {cluster.name} --output $WORKDIR/logs/$log_time/{cluster.output} --error  $WORKDIR/logs/$log_time/{cluster.error}" \
 -j 500 \
 --rerun-incomplete \
 --keep-going \
@@ -451,7 +455,7 @@ EOF
     --latency-wait 120 \
     --configfile ${WORKDIR}/config.yaml \
     --cluster-config ${PIPELINE_HOME}/resources/cluster.yaml \
-    --cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {params.rname} --output $WORKDIR/logs/$log_time/{cluster.output} --error  $WORKDIR/logs/$log_time/{cluster.error}" \
+    --cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {cluster.name} --output $WORKDIR/logs/$log_time/{cluster.output} --error  $WORKDIR/logs/$log_time/{cluster.error}" \
     -j 500 \
     --rerun-incomplete \
     --scheduler greedy  \

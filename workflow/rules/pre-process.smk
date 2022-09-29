@@ -33,7 +33,8 @@ rule assembly:
         TOOLS["pear"]["version"]
     threads: getthreads("assembly")
     params:
-        rname="assembly"
+        rname="assembly",
+        localtmp=join(RESULTSDIR,'tmp','assembly')
     output:
         merged_fq=join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz')
     shell:
@@ -42,7 +43,7 @@ rule assembly:
         if [[ -d $tmp_dir ]]; then
             export $tmp_dir
         else
-            tmp_dir=join(RESULTSDIR,'tmp','assembly')
+            tmp_dir={params.localtmp}
             if [[ -d $tmp_dir ]]; then rm -r $tmp_dir; fi 
             mkdir -p $tmp_dir
         fi
@@ -121,7 +122,8 @@ rule select_bed:
     threads: getthreads("hist_frags")
     params:
         rname="hist_frags",
-        rscript=join(WORKDIR,"scripts","hist.r")
+        rscript=join(WORKDIR,"scripts","hist.r"),
+        localtmp=join(RESULTSDIR,'tmp','selectbed')
     output:
         selected_bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed')
     shell:
@@ -130,7 +132,7 @@ rule select_bed:
         if [[ -d $tmp_dir ]]; then
             export $tmp_dir
         else
-            tmp_dir=join(RESULTSDIR,'tmp','assembly')
+            tmp_dir={params.localtmp}
             if [[ -d $tmp_dir ]]; then rm -r $tmp_dir; fi 
             mkdir -p $tmp_dir
         fi

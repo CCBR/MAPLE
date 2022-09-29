@@ -294,21 +294,10 @@ function runslurm() {
 
 }
 
-function _get_file_modtime() {
-
-# get the modification time for a file
-
-  filename=$1
-  modtime=$(stat $filename|grep Modify|awk '{print $2,$3}'|awk -F"." '{print $1}'|sed "s/ //g"|sed "s/-//g"|sed "s/://g")
-  echo $modtime
-
-}
-
 function create_runinfo() {
 
   # Create a runinfo.yaml file in the WORKDIR
-  modtime=$(_get_file_modtime ${WORKDIR}/logs/$log_time/runinfo.yaml)
-  runinfo=${WORKDIR}/logs/$log_time/runinfo.yaml.${modtime}
+  runinfo=${WORKDIR}/logs/$log_time/runinfo.yaml.${log_time}
 
   echo "Pipeline Dir: $PIPELINE_HOME" > $runinfo
   echo "Git Commit/Tag: $GIT_COMMIT_TAG" >> $runinfo
@@ -320,37 +309,6 @@ function create_runinfo() {
   echo "Groups: $g" >> $runinfo
   d=$(date)
   echo "Date/Time: $d" >> $runinfo
-
-}
-
-
-function preruncleanup() {
-
-# Cleanup function to rename/move files related to older runs to prevent overwriting them.
-
-  echo "Running..."
-
-  # check initialization
-  check_essential_files 
-
-  cd $WORKDIR
-  ## Archive previous run files
-  if [ -f ${WORKDIR}/snakemake.log ];then 
-    modtime=$(_get_file_modtime ${WORKDIR}/snakemake.log)
-    mv ${WORKDIR}/snakemake.log ${WORKDIR}/stats/snakemake.${modtime}.log
-    if [ -f ${WORKDIR}/snakemake.log.HPC_summary.txt ];then 
-      mv ${WORKDIR}/snakemake.log.HPC_summary.txt ${WORKDIR}/stats/snakemake.${modtime}.log.HPC_summary.txt
-    fi
-    if [ -f ${WORKDIR}/snakemake.stats ];then 
-      mv ${WORKDIR}/snakemake.stats ${WORKDIR}/stats/snakemake.${modtime}.stats
-    fi
-  fi
-  nslurmouts=$(find ${WORKDIR} -maxdepth 1 -name "slurm-*.out" |wc -l)
-  if [ "$nslurmouts" != "0" ];then
-    for f in $(ls ${WORKDIR}/slurm-*.out);do mv ${f} ${WORKDIR}/logs/;done
-  fi
-
-  create_runinfo
 
 }
 
@@ -375,7 +333,7 @@ function run() {
   if [ "$1" == "local" ];then
 
   create_logtime
-  preruncleanup
+  create_runinfo
   
   snakemake -s $SNAKEFILE \
   --directory $WORKDIR \
@@ -398,7 +356,7 @@ function run() {
 
   elif [ "$1" == "slurm" ];then
     create_logtime
-    preruncleanup
+    create_runinfo
     
     # if QOS is other than "global" and is supplied in the cluster.json file then add " --qos={cluster.qos}" to the 
     # snakemake command below

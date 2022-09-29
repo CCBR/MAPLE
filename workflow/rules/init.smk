@@ -49,7 +49,6 @@ RESULTSDIR=join(WORKDIR,"results")
 
 # get scripts folder
 SCRIPTSDIR = join(WORKDIR,"scripts")
-print(SCRIPTSDIR)
 check_existence(SCRIPTSDIR)
 
 # get resources folder
@@ -90,11 +89,8 @@ SAMPLESDF = pd.read_csv(config["samplemanifest"],sep="\t",header=0,index_col="sa
 SAMPLES = list(SAMPLESDF.index)
 
 print("# Checking Sample Manifest...")
-print("# \tTotal Samples in manifest : "+str(len(SAMPLES)))
+print("## \tTotal Samples in manifest : "+str(len(SAMPLES)))
 print("# Checking read access to raw fastqs...")
-
-#SAMPLESDF["path_to_R1_fastq"]=join(RESOURCESDIR,"dummy")
-#SAMPLESDF["path_to_R2_fastq"]=join(RESOURCESDIR,"dummy")
 
 # only PE samples are supported by the pipeline
 for sampleid in SAMPLES:
@@ -116,18 +112,8 @@ for sampleid in SAMPLES:
         os.symlink(R2file,R2filenewname)
         SAMPLESDF.loc[[sampleid],"R2"]=R2filenewname
 
-print("# Read access to all raw fastqs is confirmed!")
+print("## \tRead access to all raw fastqs is confirmed!")
 
-# SAMPLE2REPLICATES=dict()
-# for g in SAMPLES:
-#     SAMPLE2REPLICATES[g]=list(SAMPLESDF[SAMPLESDF['sampleName']==g].index)
-
-# print(SAMPLESDF.columns)
-# print(SAMPLESDF.sampleName)
-# print(SAMPLES[0])
-# print(SAMPLESDF[SAMPLESDF['sampleName']==SAMPLES[0]].index)
-# print(SAMPLE2REPLICATES)
-# exit()
 #########################################################
 
 #########################################################
@@ -177,8 +163,9 @@ QCDIR=join(RESULTSDIR,"QC")
 #########################################################
 # SET OTHER PIPELINE GLOBAL VARIABLES
 #########################################################
+print("#"*66)
+print("#"*66)
 print("# Pipeline Parameters:")
-print("#"*100)
 print("# Working dir :",WORKDIR)
 print("# Results dir :",RESULTSDIR)
 print("# Scripts dir :",SCRIPTSDIR)

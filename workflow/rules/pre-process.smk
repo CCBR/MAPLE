@@ -38,7 +38,7 @@ rule assembly:
         merged_fq=join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz')
     shell:
         """
-        tmp_dir="/lscratch/${{SLURMJOB}}"
+        tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
         if [[ -d $tmp_dir ]]; then
             export $tmp_dir
         else
@@ -126,7 +126,7 @@ rule select_bed:
         selected_bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed')
     shell:
         """
-        tmp_dir="/lscratch/${{SLURMJOB}}"
+        tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
         if [[ -d $tmp_dir ]]; then
             export $tmp_dir
         else

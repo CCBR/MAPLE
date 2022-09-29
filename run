@@ -307,7 +307,7 @@ function _get_file_modtime() {
 function create_runinfo() {
 
   # Create a runinfo.yaml file in the WORKDIR
-  modtime=$(_get_file_modtime ${WORKDIR}/runinfo.yaml)
+  modtime=$(_get_file_modtime ${WORKDIR}/logs/$log_time/runinfo.yaml)
   runinfo=${WORKDIR}/logs/$log_time/runinfo.yaml.${modtime}
 
   echo "Pipeline Dir: $PIPELINE_HOME" > $runinfo

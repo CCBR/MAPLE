@@ -369,6 +369,8 @@ function run() {
 #SBATCH --partition="norm"
 #SBATCH --time=96:00:00
 #SBATCH --cpus-per-task=2
+#SBATCH --output=$WORKDIR/logs/${log_time}/00_%j_%x.out \
+#SBATCH --mail-type=BEGIN,END,FAIL
 
 module load $PYTHON_VERSION
 module load $SNAKEMAKE_VERSION

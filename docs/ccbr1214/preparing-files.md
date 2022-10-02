@@ -24,12 +24,9 @@ The MultiQC screen configuration files control the parameters used for MultiQC.
 There are several groups of parameters that are editable for the user to control the various aspects of the pipeline. These are :
 
 - Folders and Paths
-  
-  - These parameters will include the input and ouput files of the pipeline, as well as list all manifest names.
-
+    - These parameters will include the input and ouput files of the pipeline, as well as list all manifest names.
 - User parameters
-
-  - These parameters will control the pipeline features. These include thresholds and whether to perform processes.
+    - These parameters will control the pipeline features. These include thresholds and whether to perform processes.
 
 ## 2.2 Preparing Manifests
 There are two manifests which are required for the pipeline. These files describe information on the samples and desired contrasts. The paths of these files are defined in the config.yaml file. These files are:

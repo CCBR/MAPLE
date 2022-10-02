@@ -31,7 +31,7 @@ def check_samples(input_df,error_log):
             #check all filenames end in .fastq.gz
             for item in tmp_list:
                 if not (item.endswith('.fastq.gz')):
-                    error_log.append("All items in file_name column must end in fastq.gz - please update filename: {}\n".format(item))
+                    error_log.append("All items in file_name column must end in .fastq.gz - please update filename: {}\n".format(item))
 
         #sampleName
         if select_cols == "sampleName":
@@ -76,13 +76,13 @@ def check_sample_to_contrast(input_df_s,input_df_c,error_log,de_log):
             
             #if any samples are missing, print error
             if len(l_ctos) !=0:
-                error_log.append("The following sample(s) was/were not found in the sample_manifest tsv but were found in the contrasts manifest: {}. Please review manifests.".format(l_ctos))
+                error_log.append("The following sample(s) was/were not found in the sample_manifest.tsv but were found in the contrasts manifest: {}. Please review manifests.".format(l_ctos))
                 check=check+1
 
     # check row contains unique values
     for index, row in input_df_c.iterrows():
         if(len(set(row)) != len(row)):
-            error_log.append("Duplicate contrasts were found in the contrast manifest. Each row must contain unique sample names. Please review and update the manifest {}.".format(row))
+            error_log.append("Duplicate contrasts were found in the contrast_manifest.tsv. Each row must contain unique sample names. Please review and update the manifest {}.".format(row))
             check=check+1
 
     if check == 0:

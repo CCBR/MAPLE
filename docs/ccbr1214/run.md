@@ -3,7 +3,7 @@
 The Snakemake workflow has a multiple options:
 ```
 Usage:
-    bash ${SCRIPTNAME} -m/--runmode=<RUNMODE> -w/--workdir=<WORKDIR>
+    ./run -m/--runmode=<RUNMODE> -w/--workdir=<WORKDIR>
 
     Required Arguments:
     1.  RUNMODE: [Type: String] Valid options:

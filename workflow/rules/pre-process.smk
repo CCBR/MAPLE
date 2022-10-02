@@ -34,25 +34,25 @@ rule assembly:
     threads: getthreads("assembly")
     params:
         rname="assembly",
-        localtmp=join(RESULTSDIR,'tmp','assembly')
+        localtmp=join(RESULTSDIR,'tmp','assembly'),
+        sp='{sample_id}'
     output:
         merged_fq=join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz')
     shell:
         """
-        if [[ -d $tmp_dir ]]; then
-            tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
-        else
+        tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
+        if [[ ! -d $tmp_dir ]]; then
             tmp_dir={params.localtmp}
             if [[ -d $tmp_dir ]]; then rm -r $tmp_dir; fi 
             mkdir -p $tmp_dir
         fi
 
         # run assembly
-        pear -p 0.0001 -f {input.f1} -r {input.f2} -o $tmp_dir -j 32
+        pear -p 0.0001 -f {input.f1} -r {input.f2} -o $tmp_dir/{params.sp} -j 32
         
         # gzip and move
-        gzip -f $tmp_dir/*.assembled.fastq
-        mv $tmp_dir/*.assembled.fastq.gz {output.merged_fq}
+        gzip -f $tmp_dir/{params.sp}.assembled.fastq
+        mv $tmp_dir/{params.sp}.assembled.fastq.gz {output.merged_fq}
         """
 
 
@@ -127,9 +127,8 @@ rule select_bed:
         selected_bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed')
     shell:
         """
-        if [[ -d $tmp_dir ]]; then
-            tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
-        else
+        tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
+        if [[ ! -d $tmp_dir ]]; then
             tmp_dir={params.localtmp}
             if [[ -d $tmp_dir ]]; then rm -r $tmp_dir; fi 
             mkdir -p $tmp_dir

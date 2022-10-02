@@ -10,3 +10,5 @@ __default__:
     error: .%j.{params.rname}.{wildcards}.err
     name: .{params.rname}.{wildcards}
     
+assembly:
+    gres: lscratch:256

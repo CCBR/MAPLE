@@ -1,0 +1,1 @@
+The MNaseSeq pipeline was developed in support of NIH's [Dr. Zhurkin Laboratory](https://ccr.cancer.gov/staff-directory/victor-b-zhurkin). It has been developed and tested solely on NIH HPC Biowulf.

@@ -172,7 +172,7 @@ with open(INDEXYAML) as yaml_file:
     INDEX = yaml.load(yaml_file, Loader=yaml.FullLoader)
 GENOME=config["species"]
 INDEXDIR=INDEX[GENOME]
-check_readaccess(join(INDEXDIR,GENOME+".genome"))
+check_existence(INDEXDIR)
 print("# Bowtie index dir:",INDEXDIR)
 
 #GENOMEFILE=join(INDEXDIR,GENOME+".genome") # genome file is required by macs2 peak calling

@@ -1,6 +1,6 @@
-5. Pipeline Tutorial
-Welcome to the MNaseSeq Pipeline Tutorial!
 # 5. Pipeline Tutorial
+Welcome to the MNaseSeq Pipeline Tutorial!
+
 ## 5.1 Getting Started
 Review the information on the Getting Started for a complete overview the pipeline. The tutorial below will use test data available on NIH Biowulf HPC only. All example code will assume you are running v1.0 of the pipeline, from the shared [tobedetermined] storage directory, using test_1 data.
 
@@ -25,6 +25,7 @@ These include:
 - test_2: Triple sample comparison (three samples)
 
 **B. Pull the test data to your output directory**
+
 NOTE: Test data is currently available for v1.0. Please contact samantha.sevilla@nih.gov to create other test data.
 
 ```

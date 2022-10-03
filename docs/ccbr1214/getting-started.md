@@ -2,7 +2,7 @@
 The MNaseSeq github repository is stored locally, and will be used for project deployment. Multiple projects can be deployed from this one point simultaneously, without concern.
 
 ## 1. Getting Started
-### 1.1 Introduction¶
+### 1.1 Introduction
 The MNaseSeq Pipeline beings with raw FASTQ files and performs adaptor trimming, assembly, and alignment. Bed files are created, and depending on user input, selected regions of interst may be used. Fragment centers (DYAD's) are then determined, and histograms of occurences are created. QC reports are also generated with each project.
 
 The following are sub-commands used within MNaseSeq:

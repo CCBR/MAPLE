@@ -12,6 +12,9 @@ rule dyad_analysis:
     python3 WeigthedDYADposition.py ${output}.selected.hg19.140-160.bed ${output}.DYADs
     sort -k1,1 -k2n,2 ${output}.DYADs > ${output}.DYADs.sorted
     python Uniq_Position.py ${output}.DYADs.sorted ${output}.DYADs.hist
+
+    ## Compute auto-correlation ###########
+    python ALU_DAC.py ${output}.DYADs.hist ${limit} ${max_dist} ${output}.DAC.csv
     '''
     input:
         bed=get_dyad_input
@@ -21,8 +24,8 @@ rule dyad_analysis:
     params:
         rname="find_dyads",
         position_script=join(WORKDIR,"scripts","WeigthedDYADposition.py"),
-        hist_script=join(WORKDIR,"scripts","Uniq_Position.py"),
-        csv_script=join(WORKDIR,"scripts","ALU_DAC.py"),
+        hist_script=join(WORKDIR,"scripts","uniq_position.py"),
+        csv_script=join(WORKDIR,"scripts","DAC.py"),
         limit=config["limit"],
         max_d=config["max_distance"]
     output:

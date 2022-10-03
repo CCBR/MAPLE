@@ -12,23 +12,7 @@ R:
  version: "R/4.0.3"
 python37:
  version: "python/3.7"
-
-# fastqc:
-#  version: "fastqc/0.11.9"
-# hisat:
-#  version: "hisat/2.2.1.0"
-# multiqc:
-#  version: "multiqc/1.9"
-# picard:
-#  version: "picard/2.25.0"
-# salmon:
-#  version: "salmon/1.4.0"
-# sambamba:
-#  version: "sambamba/0.8.0"
-# star:
-#  version: "STAR/2.7.6a"
-#  alignTranscriptsPerReadNmax: "20000"
-# stringtie:
-#  version: "stringtie/2.1.4"
-# ucsc:
-#  version: "ucsc/407"
+fastqc:
+ version: "fastqc/0.11.9"
+multiqc:
+ version: "multiqc/1.9"

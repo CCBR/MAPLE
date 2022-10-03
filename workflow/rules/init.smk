@@ -163,18 +163,17 @@ QCDIR=join(RESULTSDIR,"QC")
 #########################################################
 # SET OTHER PIPELINE GLOBAL VARIABLES
 #########################################################
-print("#"*66)
-print("#"*66)
-print("# Pipeline Parameters:")
-print("# Working dir :",WORKDIR)
-print("# Results dir :",RESULTSDIR)
-print("# Scripts dir :",SCRIPTSDIR)
-print("# Resources dir :",RESOURCESDIR)
-print("# Cluster YAML :",CLUSTERYAML)
-
-#GENOME=config["genome"]
-#INDEXDIR=config[GENOME]["indexdir"]
-#print("# Bowtie index dir:",INDEXDIR)
+try:
+    INDEXYAML = config["indexyaml"]
+except KeyError:
+    INDEXYAML = join(WORKDIR,"resources","index.yaml")
+check_readaccess(CLUSTERYAML)
+with open(INDEXYAML) as yaml_file:
+    INDEX = yaml.load(yaml_file, Loader=yaml.FullLoader)
+GENOME=config["species"]
+INDEXDIR=INDEX[GENOME]
+check_readaccess(join(INDEXDIR,GENOME+".genome"))
+print("# Bowtie index dir:",INDEXDIR)
 
 #GENOMEFILE=join(INDEXDIR,GENOME+".genome") # genome file is required by macs2 peak calling
 #check_readaccess(GENOMEFILE)
@@ -184,4 +183,16 @@ print("# Cluster YAML :",CLUSTERYAML)
 #GENOMEFA=join(INDEXDIR,GENOME+".fa") # genome file is required by motif enrichment rule
 #check_readaccess(GENOMEFA)
 #print("# Genome fasta:",GENOMEFA)
+
+#########################################################
+# SET OTHER PIPELINE GLOBAL VARIABLES
+#########################################################
+print("#"*66)
+print("#"*66)
+print("# Pipeline Parameters:")
+print("# Working dir :",WORKDIR)
+print("# Results dir :",RESULTSDIR)
+print("# Scripts dir :",SCRIPTSDIR)
+print("# Resources dir :",RESOURCESDIR)
+print("# Cluster YAML :",CLUSTERYAML)
 #########################################################

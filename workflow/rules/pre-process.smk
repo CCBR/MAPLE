@@ -72,14 +72,14 @@ rule alignment:
     threads: getthreads("alignment")
     params:
         rname="alignment",
-        species=config['species']
+        index_dir=INDEXDIR
     output:
         bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.assembled.bam'),
         mapped_bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.bam'),
         bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed')
     shell:
         """
-        bowtie2 -p 32 -x {params.species} -U {input.assembled} -S {output.bam}
+        bowtie2 -p 32 -x {params.index_dir} -U {input.assembled} -S {output.bam}
         samtools view -b -F 260 {output.bam} > {output.mapped_bam}
         bedtools bamtobed -i {output.mapped_bam} > {output.bed}
         """

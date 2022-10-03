@@ -10,9 +10,12 @@ contrastmanifest: "WORKDIR/manifests/contrasts.tsv"
 ########################################################################################
 #user parameters
 #########################################################################################
-species: "hg19"
+species: "hg19" #species hg19 or hg38
 
-run_select_bed: "Y" # whether to run pipeline for selected_bed file
+run_create_bed: "N" # if the selected bed file is not created, set the flag to Y to create it
+genes_of_interest: "WORKDIR/genes_of_interest.csv"
+
+run_select_bed: "Y" # if a selected_bed_file should be used, set the flag to Y; if the whole genome should be used set to N
 intervals_of_interest: "WORKDIR/intervals_of_interest.bed" #bed file with intervals of interest to subset data
 
 limit: 1000000

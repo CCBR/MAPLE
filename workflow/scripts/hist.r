@@ -9,9 +9,9 @@ input <- args[1]
 output_csv <- args[2]
 output_png <- args[3]
 
-input <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/02_bed/Sample1.mapped.bed"
-output_csv <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/03_histograms/Sample1.length_hist_all.csv"
-output_png <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/03_histograms/Sample1.length_hist_all.png"
+#input <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/02_bed/Sample1.mapped.bed"
+#output_csv <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/03_histograms/Sample1.length_hist_all.csv"
+#output_png <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/03_histograms/Sample1.length_hist_all.png"
 
 # read in rawdatam subset
 rawdata <- read.csv(input, header=FALSE, sep = '\t')

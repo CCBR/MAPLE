@@ -148,7 +148,9 @@ rule select_bed:
     params:
         rname="hist_frags",
         rscript=join(WORKDIR,"scripts","hist.r"),
-        localtmp=join(RESULTSDIR,'tmp','selectbed')
+        localtmp=join(RESULTSDIR,'tmp','selectbed'),
+        f_min=config["fragment_length_min"],
+        f_max=config["fragment_length_max"],
     output:
         selected_bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed')
     shell:
@@ -161,7 +163,7 @@ rule select_bed:
         fi
 
         bedtools -a {input.bed} -b {input.interval_bed} > $tmp_dir/tmp.bed
-        awk '{{ if (\$3-\$2 >= 140 && \$3-\$2 <= 160) print \$0}}' $tmp_dir/tmp.bed > {output.selected_bed}
+        awk '{{ if (\$3-\$2 >= {params.f_min} && \$3-\$2 <= {params.f_max}) print \$0}}' $tmp_dir/tmp.bed > {output.selected_bed}
         """
 
 rule selected_hist_frags:

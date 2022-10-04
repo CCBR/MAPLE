@@ -162,6 +162,18 @@ if (config["run_select_bed"]=="Y" and config["run_create_bed"]=="N"):
 #########################################################
 
 #########################################################
+# fragment size
+#########################################################
+FRAGMENT_LENGTH_MIN=config["fragment_length_min"]
+FRAGMENT_LENGTH_MAX=config["fragment_length_max"]
+
+if not FRAGMENT_LENGTH_MIN.isnumeric() and FRAGMENT_LENGTH_MAX.isnumeric():
+  raise Error("fragment_length_min and fragment_length_max must be integers")
+else:
+  if not FRAGMENT_LENGTH_MAX > FRAGMENT_LENGTH_MIN:
+    raise Error("fragment_length_min must be larger than fragment_length_max")
+
+#########################################################
 # SET OTHER PIPELINE GLOBAL VARIABLES
 #########################################################
 try:

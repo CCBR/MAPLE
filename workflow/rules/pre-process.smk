@@ -16,7 +16,7 @@ rule create_bed_file:
         selected_bed=join(RESULTSDIR,'00_selected_bed','selected_bed.bed'),
     shell:
         """
-        if [[ $create_flag == "N" ]] & [[ $select_flag == "Y" ]]; then
+        if [[ {params.create_flag} == "N" ]] & [[ {params.select_flag} == "Y" ]]; then
             grep -Fwf {params.gene_list} {input.master} | awk -v OFS='\t' '{{print \$1,\$2,\$3}}'> {output.selected_bed}
         else
             cp {params.pi_created_selected_bed} {output.selected_bed}

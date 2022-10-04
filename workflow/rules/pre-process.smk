@@ -9,15 +9,14 @@ rule create_bed_file:
     params:
         rname="create_bed_file",
         create_flag=config["run_create_bed"],
-        select_flag=config["run_select_bed"],
         gene_list=config["genes_of_interest"],
         pi_created_selected_bed=config["pi_created_selected_bed"]
     output:
         selected_bed=join(RESULTSDIR,'00_selected_bed','selected_bed.bed'),
     shell:
         """
-        if [[ {params.create_flag} == "N" ]] & [[ {params.select_flag} == "Y" ]]; then
-            grep -Fwf {params.gene_list} {input.master} | awk -v OFS='\t' '{{print \$1,\$2,\$3}}'> {output.selected_bed}
+        if [[ {params.create_flag} == "Y" ]]; then
+            grep -Fwf {params.gene_list} {input.master} | awk -v OFS='\t' '{{print $1,$2,$3}}'> {output.selected_bed}
         else
             cp {params.pi_created_selected_bed} {output.selected_bed}
         fi
@@ -109,7 +108,7 @@ rule alignment:
         bedtools bamtobed -i {output.mapped_bam} > {output.bed}
         """
 
-rule hist_frags:
+rule all_hist_frags:
     '''
     Make histogram of fragment lengths
      #Rscript hist.r ${output}.mapped.hg19.bed ${output}.mapped.hg19.length_hist.csv
@@ -118,9 +117,9 @@ rule hist_frags:
         bed=rules.alignment.output.bed,
     envmodules:
         TOOLS["R"]["version"]
-    threads: getthreads("hist_frags")
+    threads: getthreads("all_hist_frags")
     params:
-        rname="hist_frags_all",
+        rname="all_hist_frags",
         rscript=join(WORKDIR,"scripts","hist.r")
     output:
         hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),
@@ -143,7 +142,8 @@ rule select_bed:
         bed=rules.alignment.output.bed,
         interval_bed=rules.create_bed_file.output.selected_bed
     envmodules:
-        TOOLS["R"]["version"]
+        TOOLS["R"]["version"],
+        TOOLS["bedtools"]["version"]
     threads: getthreads("hist_frags")
     params:
         rname="hist_frags",
@@ -162,8 +162,8 @@ rule select_bed:
             mkdir -p $tmp_dir
         fi
 
-        bedtools -a {input.bed} -b {input.interval_bed} > $tmp_dir/tmp.bed
-        awk '{{ if (\$3-\$2 >= {params.f_min} && \$3-\$2 <= {params.f_max}) print \$0}}' $tmp_dir/tmp.bed > {output.selected_bed}
+        bedtools intersect -a {input.bed} -b {input.interval_bed} > $tmp_dir/tmp.bed
+        awk '{{ if ($3-$2 >= {params.f_min} && $3-$2 <= {params.f_max}) print $0}}' $tmp_dir/tmp.bed > {output.selected_bed}
         """
 
 rule selected_hist_frags:

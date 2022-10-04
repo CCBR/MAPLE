@@ -53,6 +53,7 @@ rule merge_DACs:
     params:
         rname="merge_DACs",
         hist_script=join(WORKDIR,"scripts","uniq_position.py"),
+        localtmp=join(RESULTSDIR,'tmp','merge_DACs'),
     output:
         merged=join(RESULTSDIR,'04_dyads','03_CSV','merged.DAC.csv'),
     shell:
@@ -64,32 +65,33 @@ rule merge_DACs:
             mkdir -p $tmp_dir
         fi
 
-        # set complete file list
-        file_list={input.dacs}
-        
-        # set variables
+        file_list=({input.dacs})
         counter=0
         header=""
 
         # for each output DAC file, join 
-        for f in ${file_list[@]}; do
+        for f in ${{file_list[@]}}; do
+            echo "working $f"
             if [[ $counter -eq 0 ]]; then
-                cat $f > $$tmp_dir/join.tmp
+                echo "working on $f" 
+                cat $f > $tmp_dir/join.tmp
             elif [[ $counter -gt 0 ]]; then
-                join -a1 -a2 -e 1  -t $',' -o auto $tmp_dir/join.tmp ${file_list[$counter]} > $tmp_dir/join.tmp.1
+                echo "now for $f"
+                join -a1 -a2 -e 1  -t $',' -o auto $tmp_dir/join.tmp ${{file_list[$counter]}} > $tmp_dir/join.tmp.1
                 mv $tmp_dir/join.tmp.1 $tmp_dir/join.tmp
             fi
 
             # remove file from file_list and continue; increase counter
-            file_list=("${file_list[@]/${file_list[$counter]}}")
+            file_list=("${{file_list[@]/${{file_list[$counter]}}}}")
             counter=$((counter+1))
 
             # clean file name to only include sample name
-            clean_f=`echo $f | sed 's/^.*\(03_CSV.*csv\).*$/\1/' | cut -f2 -d"/" | cut -f1 -d"."`
+            clean_f=`echo ${{f##*/}} | cut -f1 -d"."`
             header="$header,$clean_f"
         done
 
         # echo the header and join file to final file
-        echo "Dist$header" > $tmp_dir/header.tmp;\
-        cat $tmp_dir/header.tmp $tmp_dir/join.tmp > {output.merged}
+        echo "Dist$header" > $tmp_dir/header.tmp
+        cat $tmp_dir/header.tmp $tmp_dir/join.tmp > $tmp_dir/join.tmp.1
+        cat $tmp_dir/join.tmp.1 | grep -v "Dist,DAC" > {output.merged}
         """

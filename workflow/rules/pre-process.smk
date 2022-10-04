@@ -1,3 +1,28 @@
+rule create_bed_file:
+    '''
+    If a bed file has not already been created for target gene_list, then create it
+    If it has been created then copy it to the working dir
+    '''
+    input:
+        master=config["master_bed_file"],
+    threads: getthreads("create_bed_file")
+    params:
+        rname="create_bed_file",
+        create_flag=config["run_create_bed"],
+        select_flag=config["run_select_bed"],
+        gene_list=config["genes_of_interest"],
+        pi_created_selected_bed=config["pi_created_selected_bed"]
+    output:
+        selected_bed=join(RESULTSDIR,'00_selected_bed','selected_bed.bed'),
+    shell:
+        """
+        if [[ $create_flag == "N" ]] & [[ $select_flag == "Y" ]]; then
+            grep -Fwf {params.gene_list} {input.master} | awk -v OFS='\t' '{{print \$1,\$2,\$3}}'> {output.selected_bed}
+        else
+            cp {params.pi_created_selected_bed} {output.selected_bed}
+        fi
+        """
+
 rule trim_adaptors:
     '''
     Read samples.tsv to determine fastq files, trim adaptors
@@ -98,10 +123,11 @@ rule hist_frags:
         rname="hist_frags_all",
         rscript=join(WORKDIR,"scripts","hist.r")
     output:
-        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv')
+        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),
+        png=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.png')
     shell:
         """
-        Rscript {params.rscript} {input.bed} {output.hist}
+        Rscript {params.rscript} {input.bed} {output.hist} {output.png}
         """
 
 rule select_bed:
@@ -115,7 +141,7 @@ rule select_bed:
     '''
     input:
         bed=rules.alignment.output.bed,
-        interval_bed=config["intervals_of_interest"]
+        interval_bed=rules.create_bed_file.output.selected_bed
     envmodules:
         TOOLS["R"]["version"]
     threads: getthreads("hist_frags")
@@ -135,7 +161,7 @@ rule select_bed:
         fi
 
         bedtools -a {input.bed} -b {input.interval_bed} > $tmp_dir/tmp.bed
-        awk '{{ if (\$3-\$2 >= 140 && \$3-\$2 <= 160) print $0}}' $tmp_dir/tmp.bed > {output.selected_bed}
+        awk '{{ if (\$3-\$2 >= 140 && \$3-\$2 <= 160) print \$0}}' $tmp_dir/tmp.bed > {output.selected_bed}
         """
 
 rule selected_hist_frags:
@@ -152,8 +178,9 @@ rule selected_hist_frags:
         rname="hist_frags_select",
         rscript=join(WORKDIR,"scripts","hist.r")
     output:
-        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.csv')
+        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.csv'),
+        png=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.png')
     shell:
         """
-        Rscript {params.rscript} {input.bed} {output.hist}
+        Rscript {params.rscript} {input.bed} {output.hist} {output.png}
         """

@@ -67,8 +67,6 @@ if not os.path.exists(RESULTSDIR):
 # check read access to required files
 for f in ["samplemanifest"]:
     check_readaccess(config[f])
-if config["run_select_bed"]=="Y":
-    check_readaccess(config["intervals_of_interest"])
 #########################################################
 
 #########################################################
@@ -151,13 +149,16 @@ getmemG=lambda rname:getmemg(rname).replace("g","G")
 #########################################################
 
 #########################################################
-# QC parameters
+# selected_bed file
 #########################################################
-QCDIR=join(RESULTSDIR,"QC")
+# if user specifies to create a selected_bed
+if config["run_create_bed"]=="Y":
+    check_readaccess(config["master_bed_file"])
+    check_readaccess(config["genes_of_interest"])
 
-#FASTQ_SCREEN_CONFIG=config["fastqscreen_config"]
-#check_readaccess(FASTQ_SCREEN_CONFIG)
-#print("# FQscreen config  :",FASTQ_SCREEN_CONFIG)
+# if user specifies to run with a selected_bed, but does not select to create one
+if (config["run_select_bed"]=="Y" and config["run_create_bed"]=="N"):
+    check_readaccess(config["pi_created_selected_bed"])
 #########################################################
 
 #########################################################

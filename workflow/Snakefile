@@ -6,11 +6,14 @@ include: join("rules","post-process.smk")
 # if the parameter for selected bed is chosen then a selected_bed and bed file are required outputs
 if (config["run_select_bed"]=="Y"):
     bed_file_list=[expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed'),sample_id=SAMPLES), expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed'),sample_id=SAMPLES)]
-    histogram_file_list=[expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.csv'),sample_id=SAMPLES), expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
+    histogram_file_list=[expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.csv'),sample_id=SAMPLES), expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.png'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
+    bed_files=[join(RESULTSDIR,'00_selected_bed','selected_bed.bed')]
 else:
     bed_file_list=expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed'),sample_id=SAMPLES)
-    histogram_file_list=[expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
-    
+    histogram_file_list=[expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES),expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.png'),sample_id=SAMPLES)]
+    bed_files=[]
+
 localrules: all
 rule all:
     input: 
@@ -26,3 +29,4 @@ rule all:
         expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.sorted.DYADs'),sample_id=SAMPLES),
         expand(join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.DYADs.hist'),sample_id=SAMPLES),
         expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.DAC.csv'),sample_id=SAMPLES),
+        bed_files

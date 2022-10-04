@@ -12,11 +12,14 @@ contrastmanifest: "WORKDIR/manifests/contrasts.tsv"
 #########################################################################################
 species: "hg19" #species hg19 or hg38
 
+run_select_bed: "N" # if a selected_bed_file should be used, set the flag to Y; if the whole genome should be used set to N
 run_create_bed: "N" # if the selected bed file is not created, set the flag to Y to create it
-genes_of_interest: "WORKDIR/genes_of_interest.csv"
 
-run_select_bed: "Y" # if a selected_bed_file should be used, set the flag to Y; if the whole genome should be used set to N
-intervals_of_interest: "WORKDIR/intervals_of_interest.bed" #bed file with intervals of interest to subset data
+genes_of_interest: "WORKDIR/genes_of_interest.txt" # single column text file of genes of interest
+pi_created_selected_bed: "WORKDIR/intervals_of_interest.bed" #bed file with intervals of interest to subset data
+
+fragment_length_min: 140
+fragment_length_max: 160
 
 limit: 1000000
 max_distance: 1500
@@ -24,3 +27,4 @@ max_distance: 1500
 # reference files
 #########################################################################################
 adaptors: "/data/CCBR_Pipeliner/ccbr1214/adapters/TruSeq_and_nextera_adapters.fa"
+master_bed_file: "/data/CCBR_Pipeliner/ccbr1214/bed_files/hg19_protein-coding_genes.bed" #path to the master bed that will  be used to create a selected_bed, if one is not provided

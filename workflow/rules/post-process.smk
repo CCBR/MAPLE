@@ -40,3 +40,56 @@ rule dyad_analysis:
         python {params.hist_script} {output.sorted} {output.hist}
         python {params.csv_script} {output.hist} {params.limit} {params.max_d} {output.csv}
         """
+
+rule merge_DACs:
+    '''
+    merge all DAC files into one file
+    '''
+    input:
+        dacs=expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.DAC.csv'),sample_id=SAMPLES)
+    envmodules:
+        TOOLS["R"]["version"]
+    threads: getthreads("merge_DACs")
+    params:
+        rname="merge_DACs",
+        hist_script=join(WORKDIR,"scripts","uniq_position.py"),
+    output:
+        merged=join(RESULTSDIR,'04_dyads','03_CSV','merged.DAC.csv'),
+    shell:
+        """
+        tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
+        if [[ ! -d $tmp_dir ]]; then
+            tmp_dir={params.localtmp}
+            if [[ -d $tmp_dir ]]; then rm -r $tmp_dir; fi 
+            mkdir -p $tmp_dir
+        fi
+
+        # set complete file list
+        file_list={input.dacs}
+        
+        # set variables
+        counter=0
+        header=""
+
+        # for each output DAC file, join 
+        for f in ${file_list[@]}; do
+            if [[ $counter -eq 0 ]]; then
+                cat $f > $$tmp_dir/join.tmp
+            elif [[ $counter -gt 0 ]]; then
+                join -a1 -a2 -e 1  -t $',' -o auto $tmp_dir/join.tmp ${file_list[$counter]} > $tmp_dir/join.tmp.1
+                mv $tmp_dir/join.tmp.1 $tmp_dir/join.tmp
+            fi
+
+            # remove file from file_list and continue; increase counter
+            file_list=("${file_list[@]/${file_list[$counter]}}")
+            counter=$((counter+1))
+
+            # clean file name to only include sample name
+            clean_f=`echo $f | sed 's/^.*\(03_CSV.*csv\).*$/\1/' | cut -f2 -d"/" | cut -f1 -d"."`
+            header="$header,$clean_f"
+        done
+
+        # echo the header and join file to final file
+        echo "Dist$header" > $tmp_dir/header.tmp;\
+        cat $tmp_dir/header.tmp $tmp_dir/join.tmp > {output.merged}
+        """

@@ -29,4 +29,5 @@ rule all:
         expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.sorted.DYADs'),sample_id=SAMPLES),
         expand(join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.DYADs.hist'),sample_id=SAMPLES),
         expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.DAC.csv'),sample_id=SAMPLES),
-        bed_files
+        bed_files,
+        expand(join(RESULTSDIR,'04_dyads','03_CSV','merged.DAC.csv'),sample_id=SAMPLES),

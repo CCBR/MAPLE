@@ -1,33 +1,73 @@
 from os.path import join
+from telnetlib import theNULL
 include: join("rules","init.smk")
-include: join("rules","pre-process.smk")
-include: join("rules","post-process.smk")
+include: join("rules","build_index.smk")
+include: join("rules","generate_bed.smk")
+include: join("rules","pre_process.smk")
+include: join("rules","subsample.smk")
+include: join("rules","post_process.smk")
+
+# set species
+species=config["species"]
+
+# set reference source
+reference_source=config["reference_source"]
+
+# set selection shorthand
+selection_shorthand=config["selection_shorthand"]
+
+# set min / max lengths of fragment
+min_length=config["fragment_length_min"]
+max_length=config["fragment_length_max"]
+
+# create sample list
+SAMPLE_LIST='_and_'.join(SAMPLES)
+
+output_contrast_location=config["output_contrast_location"]
 
 # if the parameter for selected bed is chosen then a selected_bed and bed file are required outputs
-if (config["run_select_bed"]=="Y"):
-    bed_file_list=[expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed'),sample_id=SAMPLES), expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed'),sample_id=SAMPLES)]
-    histogram_file_list=[expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.csv'),sample_id=SAMPLES), expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.png'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES)]
-    bed_files=[join(RESULTSDIR,'00_selected_bed','selected_bed.bed')]
+if config["run_select_bed"]=="Y":
+    required_inputs=[expand(join(RESULTSDIR,'00_selected_bed','{shorthand}.bed'),shorthand=selection_shorthand),]
+    bed_file_list=[
+        expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{min_length}-{max_length}.{selection_shorthand}.bed'),
+            sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selection_shorthand=selection_shorthand),
+        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.{min_length}-{max_length}.{selection_shorthand}.png'),
+            sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selection_shorthand=selection_shorthand)
+    ]
 else:
-    bed_file_list=expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed'),sample_id=SAMPLES)
-    histogram_file_list=[expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),sample_id=SAMPLES),expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.png'),sample_id=SAMPLES)]
-    bed_files=[]
+    required_inputs=[]
+    bed_file_list=[]
+
+if config["run_contrasts"]=="Y":
+    final_files=[expand(join(output_contrast_location,'final_{ccl}.{min_length}-{max_length}.{selection_shorthand}.DAC.csv'),
+        ccl=CONTRASTS_CLEAN_LIST, sp=species, min_length=min_length, max_length=max_length, selection_shorthand=selection_shorthand)]
+else:
+    final_files=[]
 
 localrules: all
 rule all:
-    input: 
-        expand(join(WORKDIR,"fastqs",'{sample_id}.R1.fastq.gz'),sample_id=SAMPLES),
-        expand(join(WORKDIR,"fastqs",'{sample_id}.R2.fastq.gz'),sample_id=SAMPLES),
+    input:
+        required_inputs,
+        
+        # trimming
         expand(join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),sample_id=SAMPLES),
         expand(join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz'),sample_id=SAMPLES),
+
+        # alignment
         expand(join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.assembled.bam'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.bam'),sample_id=SAMPLES),
+
+        # assembly
+        expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.{sp}.bam'),sample_id=SAMPLES, sp=species),
+        expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.{sp}.bed'),sample_id=SAMPLES, sp=species),
+
+        # all histogram
+        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.all.png'),sample_id=SAMPLES, sp=species),
+        
+        # subselect bed file, if necessary
         bed_file_list,
-        histogram_file_list,
-        expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.sorted.DYADs'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.DYADs.hist'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.DAC.csv'),sample_id=SAMPLES),
-        bed_files,
-        expand(join(RESULTSDIR,'04_dyads','03_CSV','merged.DAC.csv'),sample_id=SAMPLES),
+
+        # DYAD analysis
+        expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{min_length}-{max_length}.{selection_shorthand}.DYADs'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, selection_shorthand=selection_shorthand),
+
+        # merge contrasts
+        final_files

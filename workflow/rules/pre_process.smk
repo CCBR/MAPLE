@@ -1,27 +1,3 @@
-rule create_bed_file:
-    '''
-    If a bed file has not already been created for target gene_list, then create it
-    If it has been created then copy it to the working dir
-    '''
-    input:
-        master=config["master_bed_file"],
-    threads: getthreads("create_bed_file")
-    params:
-        rname="create_bed_file",
-        create_flag=config["run_create_bed"],
-        gene_list=config["genes_of_interest"],
-        pi_created_selected_bed=config["pi_created_selected_bed"]
-    output:
-        selected_bed=join(RESULTSDIR,'00_selected_bed','selected_bed.bed'),
-    shell:
-        """
-        if [[ {params.create_flag} == "Y" ]]; then
-            grep -Fwf {params.gene_list} {input.master} | awk -v OFS='\t' '{{print $1,$2,$3}}'> {output.selected_bed}
-        else
-            cp {params.pi_created_selected_bed} {output.selected_bed}
-        fi
-        """
-
 rule trim_adaptors:
     '''
     Read samples.tsv to determine fastq files, trim adaptors
@@ -95,15 +71,14 @@ rule alignment:
     threads: getthreads("alignment")
     params:
         rname="alignment",
-        species=config["species"],
-        index_dir=INDEXDIR,
+        index_dir=INDEX_LOCATION,
     output:
-        bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.assembled.bam'),
-        mapped_bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.bam'),
-        bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed')
+        bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.assembled.{species}.bam'),
+        mapped_bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.{species}.bam'),
+        bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.{species}.bed')
     shell:
         """
-        bowtie2 -p 32 -x {params.index_dir}/{params.species} -U {input.assembled} -S {output.bam}
+        bowtie2 -p 32 -x {params.index_dir} -U {input.assembled} -S {output.bam}
         samtools view -b -F 260 {output.bam} > {output.mapped_bam}
         bedtools bamtobed -i {output.mapped_bam} > {output.bed}
         """
@@ -120,39 +95,11 @@ rule all_hist_frags:
     threads: getthreads("all_hist_frags")
     params:
         rname="all_hist_frags",
-        rscript=join(WORKDIR,"scripts","hist.r")
-    output:
-        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.csv'),
-        png=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_all.png')
-    shell:
-        """
-        Rscript {params.rscript} {input.bed} {output.hist} {output.png}
-        """
-
-rule select_bed:
-    '''
-    create select bed, if required
-    check access for intervals bed 
-
-    # bedtools -a ${output}.mapped.hg19.bed -b intervals_of_interests.bed > ${output}.selected.hg19.bed
-    # awk '{ if ($3-$2 >= 140 && $3-$2 <= 160) print $0}' ${output}.selected.hg19.bed > ${output}.selected.hg19.140-160.bed
-
-    '''
-    input:
-        bed=rules.alignment.output.bed,
-        interval_bed=rules.create_bed_file.output.selected_bed
-    envmodules:
-        TOOLS["R"]["version"],
-        TOOLS["bedtools"]["version"]
-    threads: getthreads("hist_frags")
-    params:
-        rname="hist_frags",
         rscript=join(WORKDIR,"scripts","hist.r"),
-        localtmp=join(RESULTSDIR,'tmp','selectbed'),
-        f_min=config["fragment_length_min"],
-        f_max=config["fragment_length_max"],
+        localtmp=join(RESULTSDIR,'tmp','histo_frags'),
     output:
-        selected_bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed')
+        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{species}.length_hist.all.csv'),
+        png=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{species}.length_hist.all.png')
     shell:
         """
         tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
@@ -162,27 +109,11 @@ rule select_bed:
             mkdir -p $tmp_dir
         fi
 
-        bedtools intersect -a {input.bed} -b {input.interval_bed} > $tmp_dir/tmp.bed
-        awk '{{ if ($3-$2 >= {params.f_min} && $3-$2 <= {params.f_max}) print $0}}' $tmp_dir/tmp.bed > {output.selected_bed}
-        """
+        # subset bed file to include only columns needed
+        awk -v OFS='\t' '{{print $1,$2,$3}}' {input.bed} > $tmp_dir/tmp.bed
 
-rule selected_hist_frags:
-    '''
-    Make histogram of selected fragment lengths
-     #Rscript hist.r ${output}.mapped.hg19.bed ${output}.mapped.hg19.length_hist.csv
-    '''
-    input:
-        bed=rules.select_bed.output.selected_bed,
-    envmodules:
-        TOOLS["R"]["version"]
-    threads: getthreads("hist_frags")
-    params:
-        rname="hist_frags_select",
-        rscript=join(WORKDIR,"scripts","hist.r")
-    output:
-        hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.csv'),
-        png=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.length_hist_selected.png')
-    shell:
-        """
-        Rscript {params.rscript} {input.bed} {output.hist} {output.png}
+        # calculate length
+        awk '{{$4 = ($3-$2); print}}' $tmp_dir/tmp.bed > $tmp_dir/tmp1.bed
+
+        Rscript {params.rscript} $tmp_dir/tmp1.bed {output.hist} {output.png}
         """

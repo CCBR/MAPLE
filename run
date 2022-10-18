@@ -124,10 +124,9 @@ function init() {
   # 2. copying essential files like config.yaml and samples.tsv into the workdir
   # 3. setting up logs and stats folders
 
-  # create output folder
-  if [ -d $WORKDIR ];then err "Folder $WORKDIR already exists!"; fi
-  mkdir -p $WORKDIR
-
+  # create output folder if it doesn't exist
+  if [ ! -d $WORKDIR ];then mkdir -p $WORKDIR; fi
+  
   #create directories
   dir_list=(logs stats scripts resources manifests)
   for pd in "${dir_list[@]}"; do 
@@ -409,7 +408,7 @@ EOF
   
   # for unlock and dryrun 
   else 
-    snakemake $1 -s $SNAKEFILE \
+    snakemake $1 -r -s $SNAKEFILE \
     --directory $WORKDIR \
     --use-envmodules \
     --printshellcmds \

@@ -113,6 +113,24 @@ for sampleid in SAMPLES:
 print("## \tRead access to all raw fastqs is confirmed!")
 
 #########################################################
+# CREATE CONTRAST DATAFRAME
+#########################################################
+DACDF = pd.read_csv(config["contrastmanifest"],sep="\t",header=0)
+CONTRAST_FILES = DACDF['DAC_files'].tolist()
+
+# pull the sample id from the contrasts DF to create final output file
+clean_list=list()
+for contID in CONTRAST_FILES:
+  # if the run_contrasts flag is on, check the file existence
+  if config["run_contrasts"] =="Y":
+    check_readaccess(contID)
+
+  save=contID.rsplit("/",1)[1]
+  save=save.split(".",1)[0]
+  clean_list.append(save)
+CONTRASTS_CLEAN_LIST='_AND_'.join(clean_list)
+
+#########################################################
 
 #########################################################
 # READ IN TOOLS REQUIRED BY PIPELINE
@@ -152,13 +170,9 @@ getmemG=lambda rname:getmemg(rname).replace("g","G")
 # selected_bed file
 #########################################################
 # if user specifies to create a selected_bed
-if config["run_create_bed"]=="Y":
+if config["run_select_bed"]=="Y":
     check_readaccess(config["master_bed_file"])
-    check_readaccess(config["genes_of_interest"])
 
-# if user specifies to run with a selected_bed, but does not select to create one
-if (config["run_select_bed"]=="Y" and config["run_create_bed"]=="N"):
-    check_readaccess(config["pi_created_selected_bed"])
 #########################################################
 
 #########################################################
@@ -176,36 +190,45 @@ else:
 #########################################################
 # SET OTHER PIPELINE GLOBAL VARIABLES
 #########################################################
+print("# Pipeline Parameters:")
+SPECIES=config["species"]
+REF_SOURCE=config["reference_source"]
+#########################################################
+
+#########################################################
+# SET INDEX VARIABLES
+#########################################################
 try:
     INDEXYAML = config["indexyaml"]
 except KeyError:
     INDEXYAML = join(WORKDIR,"resources","index.yaml")
-check_readaccess(CLUSTERYAML)
+check_readaccess(INDEXYAML)
 with open(INDEXYAML) as yaml_file:
     INDEX = yaml.load(yaml_file, Loader=yaml.FullLoader)
-GENOME=config["species"]
-INDEXDIR=INDEX[GENOME]
-check_existence(INDEXDIR)
-print("# Bowtie index dir:",INDEXDIR)
 
-#GENOMEFILE=join(INDEXDIR,GENOME+".genome") # genome file is required by macs2 peak calling
-#check_readaccess(GENOMEFILE)
-#print("# Genome :",GENOME)
-#print("# .genome :",GENOMEFILE)
+# check index access
+INDEXDIR=config["index_dir"]
+check_writeaccess(INDEXDIR)
 
-#GENOMEFA=join(INDEXDIR,GENOME+".fa") # genome file is required by motif enrichment rule
-#check_readaccess(GENOMEFA)
-#print("# Genome fasta:",GENOMEFA)
+# set flag to create index if it doesn't exist
+INDEX_SHORTHAND=INDEX[SPECIES][REF_SOURCE]["shorthand"]
+GENOME_INDEX_FILE=join(INDEX[SPECIES][REF_SOURCE]["generated"],INDEX_SHORTHAND + ".1.bt2")
+create_index_flag="N"
+try:
+    check_existence(GENOME_INDEX_FILE)
+    print("## \tBowtie index source:",INDEX[SPECIES][REF_SOURCE]["generated"])
+except:
+    create_index_flag="Y"
+    print("## \tBowtie index source will be created here:",INDEX[SPECIES][REF_SOURCE]["generated"])
+INDEX_LOCATION = INDEX[SPECIES][REF_SOURCE]["generated"]
+#########################################################
 
 #########################################################
-# SET OTHER PIPELINE GLOBAL VARIABLES
+# Print values
 #########################################################
-print("#"*66)
-print("#"*66)
-print("# Pipeline Parameters:")
-print("# Working dir :",WORKDIR)
-print("# Results dir :",RESULTSDIR)
-print("# Scripts dir :",SCRIPTSDIR)
-print("# Resources dir :",RESOURCESDIR)
-print("# Cluster YAML :",CLUSTERYAML)
+print("## \tWorking dir :",WORKDIR)
+print("## \tResults dir :",RESULTSDIR)
+print("## \tScripts dir :",SCRIPTSDIR)
+print("## \tResources dir :",RESOURCESDIR)
+print("## \tCluster YAML :",CLUSTERYAML)
 #########################################################

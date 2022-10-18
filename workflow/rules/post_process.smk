@@ -1,9 +1,23 @@
+# set selection shorthand
+selection_shorthand=config["selection_shorthand"]
+
+# set min / max lengths of fragment
+min_length=config["fragment_length_min"]
+max_length=config["fragment_length_max"]
+
+
+ # set ouput location
+output_contrast_location=config["output_contrast_location"]
+
 def get_dyad_input(wildcards):
     if (config["run_select_bed"]=="Y"):
-        dyad_input=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.selected.bed')
+        dyad_input=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{species}.' + min_length + "-" + max_length + "." + selection_shorthand +".bed")
     else:
-        dyad_input=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.bed')
+        dyad_input=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{species}.mapped.bed')
     return(dyad_input)
+
+print("OK")
+print(join(output_contrast_location,'final_' + CONTRASTS_CLEAN_LIST + "."))
 
 rule dyad_analysis:
     '''
@@ -22,17 +36,17 @@ rule dyad_analysis:
         TOOLS["python37"]["version"]
     threads: getthreads("find_dyads")
     params:
-        rname="find_dyads",
+        rname="dyad_analysis",
         position_script=join(WORKDIR,"scripts","WeigthedDYADposition.py"),
         hist_script=join(WORKDIR,"scripts","uniq_position.py"),
         csv_script=join(WORKDIR,"scripts","DAC.py"),
         limit=config["limit"],
         max_d=config["max_distance"]
     output:
-        dyads=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.DYADs'),
-        sorted=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.sorted.DYADs'),
-        hist=join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.DYADs.hist'),
-        csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.DAC.csv'),
+        dyads=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{species}.{min_length}-{max_length}.{selection_shorthand}.DYADs'),
+        sorted=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{species}.{min_length}-{max_length}.{selection_shorthand}.sorted.DYADs'),
+        hist=join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.{species}.{min_length}-{max_length}.{selection_shorthand}.DYADs.hist'),
+        csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.{selection_shorthand}.DAC.csv'),
     shell:
         """
         python3 {params.position_script} {input.bed} {output.dyads}
@@ -46,16 +60,15 @@ rule merge_DACs:
     merge all DAC files into one file
     '''
     input:
-        dacs=expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.DAC.csv'),sample_id=SAMPLES)
+        dacs=CONTRAST_FILES
     envmodules:
         TOOLS["R"]["version"]
     threads: getthreads("merge_DACs")
     params:
         rname="merge_DACs",
-        hist_script=join(WORKDIR,"scripts","uniq_position.py"),
-        localtmp=join(RESULTSDIR,'tmp','merge_DACs'),
+        localtmp=join(RESULTSDIR,'tmp','merged'),
     output:
-        merged=join(RESULTSDIR,'04_dyads','03_CSV','merged.DAC.csv'),
+        merged=join(output_contrast_location,'final_' + CONTRASTS_CLEAN_LIST + '.{min_length}-{max_length}.{selection_shorthand}.DAC.csv')
     shell:
         """
         tmp_dir="/lscratch/${{SLURM_JOB_ID}}"

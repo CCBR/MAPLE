@@ -12,14 +12,17 @@ output_png <- args[3]
 #input <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/02_bed/Sample1.mapped.bed"
 #output_csv <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/03_histograms/Sample1.length_hist_all.csv"
 #output_png <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/03_histograms/Sample1.length_hist_all.png"
+#input="~/../../../Volumes/ccbr1214/v1.0/test_3/results/03_aligned/02_bed/Sample6.mapped.bed"
+#output_csv="~/../../../Volumes/ccbr1214/v1.0/test_3/results/03_aligned/03_histograms/Sample6.length_hist_all.csv"
+#output_png="~/../../../Volumes/ccbr1214/v1.0/test_3/results/03_aligned/03_histograms/Sample6.length_hist_all.png"
 
-# read in rawdatam subset
+# read in rawdata subset
 rawdata <- read.csv(input, header=FALSE, sep = '\t')
-data <- rawdata[,1:3]
-colnames(data) <- c('Chrom', 'Start', 'End')
+#data <- rawdata[,1:3]
+colnames(data) <- c('Chrom', 'Start', 'End', 'Length')
 
 #calculate length
-data$Length <- data$End - data$Start
+#data$Length <- data$End - data$Start
 
 # create histogram, save
 p1 <- ggplot() + geom_histogram(data = data, aes(x=Length), color = 'black', fill = 'white', binwidth = 1, size = 1) +

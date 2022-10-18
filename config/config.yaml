@@ -11,20 +11,31 @@ contrastmanifest: "WORKDIR/manifests/contrasts.tsv"
 #user parameters
 #########################################################################################
 species: "hg19" #species hg19 or hg38
+reference_source: "ncbi" #NCBI or USC
 
-run_select_bed: "N" # if a selected_bed_file should be used, set the flag to Y; if the whole genome should be used set to N
-run_create_bed: "N" # if the selected bed file is not created, set the flag to Y to create it
+run_select_bed: "Y" # if a selected_bed_file should be used, set the flag to Y; if the whole genome should be used set to N
+# if running a selected bed provide the genes_of_interest to use to filter OR an already pre-subset bed file
+# proive a shorthand to describe this subset bedfile
+genes_of_interest: "/path/to/dir/genes_of_interest.txt" # single column text file of genes of interest
+pi_created_selected_bed: "/path/to/selected_bed.bed" #bed file with intervals of interest to subset data
+selection_shorthand: "shorthand_bed_name" #shorthand name to use for subsequent file tracking
 
-genes_of_interest: "WORKDIR/genes_of_interest.txt" # single column text file of genes of interest
-pi_created_selected_bed: "WORKDIR/intervals_of_interest.bed" #bed file with intervals of interest to subset data
+#pi_created_selected_bed: "/data/CCBR_Pipeliner/ccbr1214/bed_files/1000.Genes.ALU-rich.bed" #bed file with intervals of interest to subset data
+#selection_shorthand: "1000_ALUrich" #shorthand name to use for subsequent file tracking
+# pi_created_selected_bed: "/data/CCBR_Pipeliner/ccbr1214/bed_files/2500.Genes.ALU-depleted.bed" #bed file with intervals of interest to subset data
+# selection_shorthand: "2500_ALUdepleted" #shorthand name to use for subsequent file tracking
 
-fragment_length_min: "140"
-fragment_length_max: "160"
+fragment_length_min: "140" #minimum fragment length
+fragment_length_max: "160" #maximum fragment length
 
 limit: 1000000
 max_distance: 1500
+
+run_contrasts: "N" # if selected the manifest/contrast_manifest.tsv must be completed
+output_contrast_location: "WORKDIR/merged_DACS"
 #########################################################################################
 # reference files
 #########################################################################################
+index_dir: "/data/CCBR_Pipeliner/ccbr1214/indices"
 adaptors: "/data/CCBR_Pipeliner/ccbr1214/adapters/TruSeq_and_nextera_adapters.fa"
 master_bed_file: "/data/CCBR_Pipeliner/ccbr1214/bed_files/hg19_protein-coding_genes.bed" #path to the master bed that will  be used to create a selected_bed, if one is not provided

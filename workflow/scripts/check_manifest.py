@@ -104,14 +104,14 @@ error_log = check_samples(s_df,error_log)
 
 #Check contrast file
 # will check for the minimum of two contrasts, but more may be added
-check_file = sys.argv[3]
-c_df = pd.read_csv(check_file,sep="\t")
-c_req = ['contrast1','contrast2']
-error_log = check_header(c_df,c_req,check_file,error_log)
-error_log = check_contrasts(c_df,error_log)
+# check_file = sys.argv[3]
+# c_df = pd.read_csv(check_file,sep="\t")
+# c_req = ['contrast1','contrast2']
+# error_log = check_header(c_df,c_req,check_file,error_log)
+# error_log = check_contrasts(c_df,error_log)
       
 #Check concordance between sample and contrast files
-error_log,de_log = check_sample_to_contrast(s_df,c_df,error_log,de_log)
+#error_log,de_log = check_sample_to_contrast(s_df,c_df,error_log,de_log)
 
 # if there is no error, create empty file
 # if there is an error, create error log
@@ -124,9 +124,9 @@ else:
     new_path =  date_str + '.txt'
     open(new_path, 'w+').write('\n'.join(error_log))
 
-#print out DE log
-if len(de_log)!=0:
-    new_path = str(sys.argv[1]) + "manifest_log_comparisons.txt"
-    open(new_path,"w+").write('\n'.join(de_log))
+# #print out DE log
+# if len(de_log)!=0:
+#     new_path = str(sys.argv[1]) + "manifest_log_comparisons.txt"
+#     open(new_path,"w+").write('\n'.join(de_log))
 
 

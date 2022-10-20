@@ -49,19 +49,19 @@ rule all:
     input:
         required_inputs,
         
-        # trimming
-        expand(join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),sample_id=SAMPLES),
-        expand(join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz'),sample_id=SAMPLES),
+        # # trimming
+        # expand(join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),sample_id=SAMPLES),
+        # expand(join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz'),sample_id=SAMPLES),
 
-        # alignment
-        expand(join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz'),sample_id=SAMPLES),
+        # # alignment
+        # expand(join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz'),sample_id=SAMPLES),
 
-        # assembly
-        expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.{sp}.bam'),sample_id=SAMPLES, sp=species),
-        expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.{sp}.bed'),sample_id=SAMPLES, sp=species),
+        # # assembly
+        # expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.{sp}.bam'),sample_id=SAMPLES, sp=species),
+        # expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.{sp}.bed'),sample_id=SAMPLES, sp=species),
 
-        # all histogram
-        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.all.png'),sample_id=SAMPLES, sp=species),
+        # # all histogram
+        # expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.all.png'),sample_id=SAMPLES, sp=species),
         
         # subselect bed file, if necessary
         bed_file_list,

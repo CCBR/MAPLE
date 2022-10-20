@@ -115,21 +115,21 @@ print("## \tRead access to all raw fastqs is confirmed!")
 #########################################################
 # CREATE CONTRAST DATAFRAME
 #########################################################
-DACDF = pd.read_csv(config["contrastmanifest"],sep="\t",header=0)
-CONTRAST_FILES = DACDF['DAC_files'].tolist()
+if config["run_contrasts"] =="Y":
+    DACDF = pd.read_csv(config["contrastmanifest"],sep="\t",header=0)
+    CONTRAST_FILES = DACDF['DAC_files'].tolist()
 
-# pull the sample id from the contrasts DF to create final output file
-clean_list=list()
-for contID in CONTRAST_FILES:
-  # if the run_contrasts flag is on, check the file existence
-  if config["run_contrasts"] =="Y":
-    check_readaccess(contID)
-
-  save=contID.rsplit("/",1)[1]
-  save=save.split(".",1)[0]
-  clean_list.append(save)
-CONTRASTS_CLEAN_LIST='_AND_'.join(clean_list)
-
+    # pull the sample id from the contrasts DF to create final output file
+    clean_list=list()
+    for contID in CONTRAST_FILES:
+        check_readaccess(contID)
+        save=contID.rsplit("/",1)[1]
+        save=save.split(".",1)[0]
+        clean_list.append(save)
+    CONTRASTS_CLEAN_LIST='_AND_'.join(clean_list)
+else:
+    CONTRAST_FILES=config["samplemanifest"]
+    CONTRASTS_CLEAN_LIST=""
 #########################################################
 
 #########################################################

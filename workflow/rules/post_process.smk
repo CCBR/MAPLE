@@ -5,8 +5,7 @@ selection_shorthand=config["selection_shorthand"]
 min_length=config["fragment_length_min"]
 max_length=config["fragment_length_max"]
 
-
- # set ouput location
+ # set output location
 output_contrast_location=config["output_contrast_location"]
 
 def get_dyad_input(wildcards):
@@ -15,9 +14,6 @@ def get_dyad_input(wildcards):
     else:
         dyad_input=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{species}.mapped.bed')
     return(dyad_input)
-
-print("OK")
-print(join(output_contrast_location,'final_' + CONTRASTS_CLEAN_LIST + "."))
 
 rule dyad_analysis:
     '''

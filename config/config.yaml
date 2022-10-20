@@ -13,7 +13,7 @@ contrastmanifest: "WORKDIR/manifests/contrasts.tsv"
 species: "hg19" #species hg19 or hg38
 reference_source: "ncbi" #NCBI or USC
 
-run_select_bed: "Y" # if a selected_bed_file should be used, set the flag to Y; if the whole genome should be used set to N
+run_select_bed: "N" # if a selected_bed_file should be used, set the flag to Y; if the whole genome should be used set to N
 # if running a selected bed provide the genes_of_interest to use to filter OR an already pre-subset bed file
 # proive a shorthand to describe this subset bedfile
 genes_of_interest: "/path/to/dir/genes_of_interest.txt" # single column text file of genes of interest

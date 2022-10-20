@@ -32,7 +32,7 @@ limit: 1000000
 max_distance: 1500
 
 run_contrasts: "N" # if selected the manifest/contrast_manifest.tsv must be completed
-output_contrast_location: "WORKDIR/merged_DACS"
+output_contrast_location: "WORKDIR/merged_DACS" #"/data/Zhurkin-20/analysis/sent_to_pi/"
 #########################################################################################
 # reference files
 #########################################################################################

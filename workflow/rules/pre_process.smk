@@ -73,9 +73,9 @@ rule alignment:
         rname="alignment",
         index_dir=INDEX_LOCATION,
     output:
-        bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.assembled.{species}.bam'),
-        mapped_bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.{species}.bam'),
-        bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.{species}.bed')
+        bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.{species}.assembled.bam'),
+        mapped_bam=join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.{species}.mapped.bam'),
+        bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{species}.mapped.bed')
     shell:
         """
         bowtie2 -p 32 -x {params.index_dir} -U {input.assembled} -S {output.bam}

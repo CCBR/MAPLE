@@ -9,20 +9,19 @@ input <- args[1]
 output_csv <- args[2]
 output_png <- args[3]
 
-#input <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/02_bed/Sample1.mapped.bed"
-#output_csv <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/03_histograms/Sample1.length_hist_all.csv"
-#output_png <- "~/../../../Volumes/ccbr1214/v1.0/results/03_aligned/03_histograms/Sample1.length_hist_all.png"
+#input <- "~/../../../Volumes/ccbr1214/analysis/7_ARPE_5u_MNase/results/03_aligned/02_bed/7_ARPE_5u_MNase.hg19.120-140.2500_ALUdepleted.bed"
+#output_csv <- "~/../../../Volumes/ccbr1214/analysis/7_ARPE_5u_MNase/results/03_aligned/03_histograms/7_ARPE_5u_MNase.hg19.length_hist.120-140.2500_ALUdepleted.csv"
+#output_png <- "~/../../../Volumes/ccbr1214/analysis/7_ARPE_5u_MNase/results/03_aligned/03_histograms/7_ARPE_5u_MNase.hg19.length_hist.120-140.2500_ALUdepleted.png"
 #input="~/../../../Volumes/ccbr1214/v1.0/test_3/results/03_aligned/02_bed/Sample6.mapped.bed"
 #output_csv="~/../../../Volumes/ccbr1214/v1.0/test_3/results/03_aligned/03_histograms/Sample6.length_hist_all.csv"
 #output_png="~/../../../Volumes/ccbr1214/v1.0/test_3/results/03_aligned/03_histograms/Sample6.length_hist_all.png"
 
 # read in rawdata subset
-rawdata <- read.csv(input, header=FALSE, sep = '\t')
-#data <- rawdata[,1:3]
-colnames(data) <- c('Chrom', 'Start', 'End', 'Length')
+data <- read.csv(input, header=FALSE, sep = '\t')[,1:3]
+colnames(data) <- c('Chrom', 'Start', 'End')
 
 #calculate length
-#data$Length <- data$End - data$Start
+data$Length <- data$End - data$Start
 
 # create histogram, save
 p1 <- ggplot() + geom_histogram(data = data, aes(x=Length), color = 'black', fill = 'white', binwidth = 1, size = 1) +

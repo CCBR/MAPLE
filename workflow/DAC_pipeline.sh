@@ -49,9 +49,10 @@ sort -k1,1 -k2n,2 ${output}.DYADs > ${output}.DYADs.sorted
 python Uniq_Position.py ${output}.DYADs.sorted ${output}.DYADs.hist
 
 ## Compute auto-correlation ###########
-python ALU_DAC.py ${output}.DYADs.hist ${limit} ${max_dist} ${output}.DAC.csv
+python DAC.py ${output}.DYADs.hist ${limit} ${max_dist} ${output}.DAC.csv
 
-
+average_length=$(awk '{ SUM += ($3-$2); n++} END {print(int(SUM/n))}' intervals_of_interests.bed)
+python DAC_denominator.py ${output}.DYADs.his ${limit} ${max_dist} ${average_length} ${output}.DAC.csv
 
 
 ###################################

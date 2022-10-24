@@ -2,7 +2,7 @@
 # cluster configuration
 __default__:
     gres: lscratch:96
-    mem: 90g
+    mem: 40g
     partition: ccr,norm
     time: 00-08:00:00
     threads: 48
@@ -13,3 +13,7 @@ __default__:
 assembly:
     gres: lscratch:256
     time: 02-00:00:00
+
+dyad_analysis:
+    mem: 300g
+    time: 1-00:00:00

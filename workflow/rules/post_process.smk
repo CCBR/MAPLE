@@ -15,6 +15,14 @@ def get_dyad_input(wildcards):
         dyad_input=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{species}.mapped.bed')
     return(dyad_input)
 
+def get_source_bed(wildcards):
+    if (config["run_select_bed"]=="Y"):
+        source_bed=config["pi_created_selected_bed"]
+    else:
+        source_bed=config["master_bed_file"]
+    
+    return(source_bed)
+
 rule dyad_analysis:
     '''
     Find fragment centers (DYADs) and make histogram (Occurrences)
@@ -27,7 +35,8 @@ rule dyad_analysis:
     python ALU_DAC.py ${output}.DYADs.hist ${limit} ${max_dist} ${output}.DAC.csv
     '''
     input:
-        bed=get_dyad_input
+        bed=get_dyad_input,
+        source_bed=get_source_bed
     envmodules:
         TOOLS["python37"]["version"]
     threads: getthreads("find_dyads")
@@ -43,12 +52,23 @@ rule dyad_analysis:
         sorted=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{species}.{min_length}-{max_length}.{selection_shorthand}.sorted.DYADs'),
         hist=join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.{species}.{min_length}-{max_length}.{selection_shorthand}.DYADs.hist'),
         csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.{selection_shorthand}.DAC.csv'),
+        corrected_csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.{selection_shorthand}.DAC.corrected.csv'),
     shell:
         """
+        # calculate DYADS
         python3 {params.position_script} {input.bed} {output.dyads}
+        
+        # sort
         sort -k1,1 -k2n,2 {output.dyads} > {output.sorted}
+        
+        #create histogram
         python {params.hist_script} {output.sorted} {output.hist}
+
+        # compute auto-correlation; correct based on length
         python {params.csv_script} {output.hist} {params.limit} {params.max_d} {output.csv}
+        average_length=$(awk '{{ SUM += ($3-$2); n++}} END {{print(int(SUM/n))}}' {input.source_bed})
+        python DAC_denominator.py {output.hist} {params.limit} {params.max_d} $average_length {output.corrected_csv}
+
         """
 
 rule merge_DACs:

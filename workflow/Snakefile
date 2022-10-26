@@ -14,7 +14,7 @@ species=config["species"]
 reference_source=config["reference_source"]
 
 # set selection shorthand
-selection_shorthand=config["selection_shorthand"]
+selected_shorthand=config["selected_shorthand"]
 
 # set min / max lengths of fragment
 min_length=config["fragment_length_min"]
@@ -23,51 +23,52 @@ max_length=config["fragment_length_max"]
 # create sample list
 SAMPLE_LIST='_and_'.join(SAMPLES)
 
+# set pipeline phase
+pipeline_phase=config["pipeline_phase"]
+
+# set location for output_contrast
 output_contrast_location=config["output_contrast_location"]
 
-# if the parameter for selected bed is chosen then a selected_bed and bed file are required outputs
-if config["run_select_bed"]=="Y":
-    required_inputs=[expand(join(RESULTSDIR,'00_selected_bed','{shorthand}.bed'),shorthand=selection_shorthand),]
-    bed_file_list=[
-        expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{min_length}-{max_length}.{selection_shorthand}.bed'),
-            sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selection_shorthand=selection_shorthand),
-        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.{min_length}-{max_length}.{selection_shorthand}.png'),
-            sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selection_shorthand=selection_shorthand)
-    ]
-else:
-    required_inputs=[]
-    bed_file_list=[]
-
-if config["run_contrasts"]=="Y":
-    final_files=[expand(join(output_contrast_location,'final_{ccl}.{min_length}-{max_length}.{selection_shorthand}.DAC.csv'),
-        ccl=CONTRASTS_CLEAN_LIST, sp=species, min_length=min_length, max_length=max_length, selection_shorthand=selection_shorthand)]
-else:
-    final_files=[]
-
 localrules: all
-rule all:
-    input:
-        required_inputs,
+
+if (pipeline_phase == "first_pass"):
+    output_files=[
+        # index file
+        GENOME_INDEX_FILE,
         
-        # # trimming
-        # expand(join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),sample_id=SAMPLES),
-        # expand(join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz'),sample_id=SAMPLES),
+        # trimming
+        expand(join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),sample_id=SAMPLES),
+        expand(join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz'),sample_id=SAMPLES),
 
-        # # alignment
-        # expand(join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz'),sample_id=SAMPLES),
+        # assembly
+        expand(join(RESULTSDIR,'02_assembled','{sample_id}.{sp}.assembled.fastq.gz'),sample_id=SAMPLES, sp=species),
 
-        # # assembly
-        # expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.mapped.{sp}.bam'),sample_id=SAMPLES, sp=species),
-        # expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.mapped.{sp}.bed'),sample_id=SAMPLES, sp=species),
+        # alignment
+        expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.{sp}.mapped.bam'),sample_id=SAMPLES, sp=species),
+        expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.mapped.bed'),sample_id=SAMPLES, sp=species),
 
-        # # all histogram
-        # expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.all.png'),sample_id=SAMPLES, sp=species),
+        # all histogram
+        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.all.png'),sample_id=SAMPLES, sp=species),
+    ]
+elif (pipeline_phase=="second_pass"):
+    output_files=[
+        # shorthand bed file 
+        expand(join(RESULTSDIR,'00_selected_bed','{shorthand}.bed'),shorthand=selected_shorthand),
         
-        # subselect bed file, if necessary
-        bed_file_list,
+        # subselect bed file
+        expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.bed'), sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
+        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.{min_length}-{max_length}.{selected_shorthand}.png'), sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
 
         # DYAD analysis
-        expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{min_length}-{max_length}.{selection_shorthand}.DYADs'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, selection_shorthand=selection_shorthand),
+        expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.DYADs'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
+        expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.DAC.corrected.csv'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
+    ]
+elif (pipeline_phase=="third_pass"):
+# merge contrasts
+    output_files=[
+        expand(join(output_contrast_location,'final_{ccl}.{min_length}-{max_length}.{selected_shorthand}.DAC.csv'),ccl=CONTRASTS_CLEAN_LIST, sp=species, min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand)
+    ]
 
-        # merge contrasts
-        final_files
+rule all:
+    input:
+        output_files

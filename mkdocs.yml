@@ -1,10 +1,10 @@
 # Project Information
-site_name: MNaseSeq Pipeline
+site_name: MAPLE
 site_author: Samantha Sevilla, Ph.D.
 site_description: >-
-  MNaseSeq Pipeline
+  MAPLE Pipeline
 # Repository
-repo_name: slsevilla/ccbr1214
+repo_name: CCBR/ccbr1214
 repo_url: https://github.com/CCBR/ccbr1214
 edit_uri: https://github.com/CCBR/ccbr1214/edit/main/docs/
 
@@ -95,11 +95,11 @@ markdown_extensions:
 nav:
   - Background : index.md
   - Usage: 
-    - 1. Getting Started : ccbr1214/getting-started.md
-    - 2. Preparing Files: ccbr1214/preparing-files.md
-    - 3. Running the Pipeline: ccbr1214/run.md
-    - 4. Expected Output: ccbr1214/output.md
-    - 5. Running Example Data: ccbr1214/test.md
+    - 1. Getting Started : user-guide/getting-started.md
+    - 2. Preparing Files: user-guide/preparing-files.md
+    - 3. Running the Pipeline: user-guide/run.md
+    - 4. Expected Output: user-guide/output.md
+    - 5. Running Example Data: user-guide/test.md
   - FAQ:
-    - Troubleshooting: ccbr1214/troubleshooting.md
-    - Contributions: ccbr1214/contributions.md
+    - Troubleshooting: user-guide/troubleshooting.md
+    - Contributions: user-guide/contributions.md

@@ -47,3 +47,9 @@ A typical command workflow, running on the cluser, is as follows:
 ./run --runmode=dryrun --workdir=/path/to/output/dir
 ./run --runmode=run --workdir=/path/to/output/dir
 ```
+
+## 3.4 Passes explained
+MAPLE is to be run in three Passes:
+1.) first_pass completes trimming, alignment, assembly and a complete histogram
+2.) second_pass completes subsetting, DAC analysis and DYAD analysis
+3.) third pass completes comparisons between multiple samples

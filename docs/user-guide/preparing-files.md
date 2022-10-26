@@ -8,19 +8,13 @@ The configuration files control parameters and software of the pipeline. These f
 - resources/tools.yaml
 - config.yaml
 
-### 2.1.1 Cluster YAML
+### 2.1.1 Cluster YAML (REQUIRED)
 The cluster configuration file dictates the resouces to be used during submission to Biowulf HPC. There are two differnt ways to control these parameters - first, to control the default settings, and second, to create or edit individual rules. These parameters should be edited with caution, after significant testing.
 
-### 2.1.2 Tools YAML
+### 2.1.2 Tools YAML (REQUIRED)
 The tools configuration file dictates the version of each tool that is being used. Updating the versions may break specific rules if versions are not backwards compatible with the defaults listed.
 
-### 2.1.3 FASTQ Screen Config
-The FASTQ screen configuration files dictates the parameters used for FASTQ Screen.
-
-### 2.1.4 MultiQC Config
-The MultiQC screen configuration files control the parameters used for MultiQC.
-
-### 2.1.5 Config YAML
+### 2.1.3 Config YAML (REQUIRED)
 There are several groups of parameters that are editable for the user to control the various aspects of the pipeline. These are :
 
 - Folders and Paths
@@ -29,10 +23,10 @@ There are several groups of parameters that are editable for the user to control
       - These parameters will control the pipeline features. These include thresholds and whether to perform processes.
 
 ## 2.2 Preparing Manifests
-There are two manifests which are required for the pipeline. These files describe information on the samples and desired contrasts. The paths of these files are defined in the config.yaml file. These files are:
+There are two manifests used for the pipeline. These files describe information on the samples and desired contrasts. The paths of these files are defined in the config.yaml file. These files are:
 
-- sampleManifest
-- contrastManifest
+- sampleManifest (REQUIRED for all Passes)
+- contrastManifest (REQUIRED for third_pass)
 
 ### 2.2.1 Samples Manifest
 This manifest will include information to sample level information. It includes the following column headers: sampleName type path_to_R1_fastq path_to_R2_fastq
@@ -53,20 +47,15 @@ Sample4     tumor   /path/to/sample4.R1.fastq.gz    /path/to/sample4.R2.fastq.gz
 ```
 
 ### 2.2.2 Contrast Manifest
-This manifest will include sample level information to compare samples. - contrast1: the sample name, identified in the samplesManifest [sampleName] column, of the sample to compare. example: 'Sample1' - contrast2: the sample name, identified in the samplesManifest [sampleName] column, of the sample to compare. example: 'Sample2'
-
-Additional columns may be added, however, the same number of comparisons must be performed each time. For example, manifest 1 would be accepted, but manifest 2 would fail, as row 1 has three comparisons and row 2 has four comparisons.
+This manifest will include contrast information of samples to compare. The first two Passes must be complete in order to run this final phase.
 
 Manifest example 1 (PASS)
 ```
-contrast1   contrast2   contrast3
-Sample1     Sample2     Sample3
-Sample2     Sample3     Sample4
+/path/to/RESULTSDIR/04_dyad/03_csv/sample1.hg19.140-160.DYAD_corrected.csv
+/path/to/RESULTSDIR/04_dyad/03_csv/sample2.hg19.140-160.DYAD_corrected.csv
 ```
 
-Manifest example 2 (FAIL)
+This wil create the output file, dependent on the config inputs for `output_contrast_location` and the `selected_shorthand`:
 ```
-contrast1   contrast2   contrast3   contrast4
-Sample1     Sample2     Sample3
-Sample2     Sample3     Sample4     Sample1
+/path/to/output_contrast_location/final_sample1.sample2.140-160.selected_shorthand.DAC.csv
 ```

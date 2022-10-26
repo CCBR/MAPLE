@@ -1,9 +1,9 @@
 # Overview
-The MNaseSeq github repository is stored locally, and will be used for project deployment. Multiple projects can be deployed from this one point simultaneously, without concern.
+The MAPLE ([M]NaseSeq [A]nalysis [P]ipe[l]i[n]e) github repository is stored locally, and will be used for project deployment. Multiple projects can be deployed from this one point simultaneously, without concern.
 
 ## 1. Getting Started
 ### 1.1 Introduction
-The MNaseSeq Pipeline beings with raw FASTQ files and performs adaptor trimming, assembly, and alignment. Bed files are created, and depending on user input, selected regions of interst may be used. Fragment centers (DYAD's) are then determined, and histograms of occurences are created. QC reports are also generated with each project.
+MAPLE beings with raw FASTQ files and performs adaptor trimming, assembly, and alignment. Bed files are created, and depending on user input, selected regions of interst may be used. Fragment centers (DYAD's) are then determined, and histograms of occurences are created. QC reports are also generated with each project.
 
 The following are sub-commands used within MNaseSeq:
 
@@ -26,7 +26,7 @@ MNaseSeq has several dependencies listed below. These dependencies can be instal
 - samtools: "samtools/1.11"
 
 ## 1.3 Login to the cluster
-MNaseSeq has been exclusively tested on Biowulf HPC. Login to the cluster's head node and move into the pipeline location.
+MAPLE has been exclusively tested on Biowulf HPC. Login to the cluster's head node and move into the pipeline location.
 ```
 # ssh into cluster's head node
 ssh -Y $USER@biowulf.nih.gov

@@ -10,20 +10,27 @@ contrastmanifest: "WORKDIR/manifests/contrasts.tsv"
 ########################################################################################
 #user parameters
 #########################################################################################
+###### Required
 species: "hg19" #species hg19 or hg38
-reference_source: "ncbi" #NCBI or USC
+reference_source: "usc" #NCBI or USC
 
-run_select_bed: "N" # if a selected_bed_file should be used, set the flag to Y; if the whole genome should be used set to N
-# if running a selected bed provide the genes_of_interest to use to filter OR an already pre-subset bed file
-# proive a shorthand to describe this subset bedfile
+# first_pass completes trimming, alignment, assembly and a complete histogram
+# second_pass completes subsetting, DAC analysis and DYAD analysis
+# third pass completes comparisons between multiple samples
+pipeline_phase: "first_pass" #first_pass, second_pass, third_pass
+
+###### second_pass required
+# User may change the selected-bed file to include a different bed file to subset samples
+# if this bed file does not yet exist, provide a genes_of_interest file and it will be created
+# must provide a shorthand to describe this subset bedfile
+selected_bed: "/data/Zhurkin-20/REFERENCES/hg19/hg19/hg19_protein-coding_genes.bed" #bed file with intervals of interest to subset data
+selected_shorthand: "proteinCoding" #shorthand name to use for subsequent file tracking
 genes_of_interest: "/path/to/dir/genes_of_interest.txt" # single column text file of genes of interest
-pi_created_selected_bed: "/path/to/selected_bed.bed" #bed file with intervals of interest to subset data
-selection_shorthand: "shorthand_bed_name" #shorthand name to use for subsequent file tracking
 
-#pi_created_selected_bed: "/data/CCBR_Pipeliner/ccbr1214/bed_files/1000.Genes.ALU-rich.bed" #bed file with intervals of interest to subset data
-#selection_shorthand: "1000_ALUrich" #shorthand name to use for subsequent file tracking
-# pi_created_selected_bed: "/data/CCBR_Pipeliner/ccbr1214/bed_files/2500.Genes.ALU-depleted.bed" #bed file with intervals of interest to subset data
-# selection_shorthand: "2500_ALUdepleted" #shorthand name to use for subsequent file tracking
+# selected_bed: "/data/CCBR_Pipeliner/ccbr1214/bed_files/1000.Genes.ALU-rich.bed" #bed file with intervals of interest to subset data
+# selected_shorthand: "1000_ALUrich" #shorthand name to use for subsequent file tracking
+# selected_bed: "/data/CCBR_Pipeliner/ccbr1214/bed_files/2500.Genes.ALU-depleted.bed" #bed file with intervals of interest to subset data
+# selected_shorthand: "2500_ALUdepleted" #shorthand name to use for subsequent file tracking
 
 fragment_length_min: "140" #minimum fragment length
 fragment_length_max: "160" #maximum fragment length
@@ -31,7 +38,8 @@ fragment_length_max: "160" #maximum fragment length
 limit: 1000000
 max_distance: 1500
 
-run_contrasts: "N" # if selected the manifest/contrast_manifest.tsv must be completed
+###### third required
+# if selected the manifest/contrast_manifest.tsv must be completed
 output_contrast_location: "WORKDIR/merged_DACS" #"/data/Zhurkin-20/analysis/sent_to_pi/"
 #########################################################################################
 # reference files
@@ -39,3 +47,13 @@ output_contrast_location: "WORKDIR/merged_DACS" #"/data/Zhurkin-20/analysis/sent
 index_dir: "/data/CCBR_Pipeliner/ccbr1214/indices"
 adaptors: "/data/CCBR_Pipeliner/ccbr1214/adapters/TruSeq_and_nextera_adapters.fa"
 master_bed_file: "/data/CCBR_Pipeliner/ccbr1214/bed_files/hg19_protein-coding_genes.bed" #path to the master bed that will  be used to create a selected_bed, if one is not provided
+
+./run --runmode=init --workdir=/data/Zhurkin-20/analysis/2_Bst_norm_5_200
+
+
+./run --runmode=init --workdir=/data/Zhurkin-20/analysis/3_Bst_tum_5u
+./run --runmode=init --workdir=/data/Zhurkin-20/analysis/4_Bst_tum_5_200
+./run --runmode=init --workdir=/data/Zhurkin-20/analysis/5_RWPE_5u
+./run --runmode=init --workdir=/data/Zhurkin-20/analysis/6_RWPE_5_200
+./run --runmode=init --workdir=/data/Zhurkin-20/analysis/7_NB26_5u
+./run --runmode=init --workdir=/data/Zhurkin-20/analysis/8_NB26_5_200

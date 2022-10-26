@@ -8,9 +8,8 @@ rule build_index_files:
     '''
     If the index has not been created, then create it
     '''
-    input:
-        samples=config["samplemanifest"],
-    threads: getthreads("create_index_file")
+    threads: 
+        getthreads("create_index_file")
     envmodules:
         TOOLS["bowtie2"]["version"],
     params:

@@ -37,7 +37,7 @@ rule assembly:
         localtmp=join(RESULTSDIR,'tmp','assembly'),
         sp='{sample_id}'
     output:
-        merged_fq=join(RESULTSDIR,'02_assembled','{sample_id}.assembled.fastq.gz')
+        merged_fq=join(RESULTSDIR,'02_assembled','{sample_id}.{species}.assembled.fastq.gz')
     shell:
         """
         tmp_dir="/lscratch/${{SLURM_JOB_ID}}"

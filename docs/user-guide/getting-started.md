@@ -1,5 +1,5 @@
 # Overview
-The MAPLE ([M]NaseSeq [A]nalysis [P]ipe[l]i[n]e) github repository is stored locally, and will be used for project deployment. Multiple projects can be deployed from this one point simultaneously, without concern.
+The MAPLE (**M**NaseSeq **A**nalysis **P**ipe**l**i**n**e) github repository is stored locally, and will be used for project deployment. Multiple projects can be deployed from this one point simultaneously, without concern.
 
 ## 1. Getting Started
 ### 1.1 Introduction

@@ -16,4 +16,4 @@ assembly:
 
 dyad_analysis:
     mem: 300g
-    time: 1-00:00:00
+    time: 2-00:00:00

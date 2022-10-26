@@ -115,7 +115,7 @@ print("## \tRead access to all raw fastqs is confirmed!")
 #########################################################
 # CREATE CONTRAST DATAFRAME
 #########################################################
-if config["run_contrasts"] =="Y":
+if config["pipeline_phase"] =="third_phase":
     DACDF = pd.read_csv(config["contrastmanifest"],sep="\t",header=0)
     CONTRAST_FILES = DACDF['DAC_files'].tolist()
 
@@ -170,8 +170,7 @@ getmemG=lambda rname:getmemg(rname).replace("g","G")
 # selected_bed file
 #########################################################
 # if user specifies to create a selected_bed
-if config["run_select_bed"]=="Y":
-    check_readaccess(config["master_bed_file"])
+check_readaccess(config["master_bed_file"])
 
 #########################################################
 
@@ -211,8 +210,7 @@ INDEXDIR=config["index_dir"]
 check_writeaccess(INDEXDIR)
 
 # set flag to create index if it doesn't exist
-INDEX_SHORTHAND=INDEX[SPECIES][REF_SOURCE]["shorthand"]
-GENOME_INDEX_FILE=join(INDEX[SPECIES][REF_SOURCE]["generated"],INDEX_SHORTHAND + ".1.bt2")
+GENOME_INDEX_FILE=join(INDEX[SPECIES][REF_SOURCE]["generated"] + ".1.bt2")
 create_index_flag="N"
 try:
     check_existence(GENOME_INDEX_FILE)

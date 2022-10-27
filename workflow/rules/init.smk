@@ -115,7 +115,7 @@ print("## \tRead access to all raw fastqs is confirmed!")
 #########################################################
 # CREATE CONTRAST DATAFRAME
 #########################################################
-if config["pipeline_phase"] =="third_phase":
+if config["pipeline_phase"] =="third_pass":
     DACDF = pd.read_csv(config["contrastmanifest"],sep="\t",header=0)
     CONTRAST_FILES = DACDF['DAC_files'].tolist()
 

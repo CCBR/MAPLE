@@ -23,7 +23,7 @@ pipeline_phase: "first_pass" #first_pass, second_pass, third_pass
 # User may change the selected-bed file to include a different bed file to subset samples
 # if this bed file does not yet exist, provide a genes_of_interest file and it will be created
 # must provide a shorthand to describe this subset bedfile
-selected_bed: "/data/Zhurkin-20/REFERENCES/hg19/hg19/hg19_protein-coding_genes.bed" #bed file with intervals of interest to subset data
+selected_bed: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed" #bed file with intervals of interest to subset data
 selected_shorthand: "proteinCoding" #shorthand name to use for subsequent file tracking
 genes_of_interest: "/path/to/dir/genes_of_interest.txt" # single column text file of genes of interest
 
@@ -44,16 +44,6 @@ output_contrast_location: "WORKDIR/merged_DACS" #"/data/Zhurkin-20/analysis/sent
 #########################################################################################
 # reference files
 #########################################################################################
-index_dir: "/data/CCBR_Pipeliner/ccbr1214/indices"
-adaptors: "/data/CCBR_Pipeliner/ccbr1214/adapters/TruSeq_and_nextera_adapters.fa"
-master_bed_file: "/data/CCBR_Pipeliner/ccbr1214/bed_files/hg19_protein-coding_genes.bed" #path to the master bed that will  be used to create a selected_bed, if one is not provided
-
-./run --runmode=init --workdir=/data/Zhurkin-20/analysis/2_Bst_norm_5_200
-
-
-./run --runmode=init --workdir=/data/Zhurkin-20/analysis/3_Bst_tum_5u
-./run --runmode=init --workdir=/data/Zhurkin-20/analysis/4_Bst_tum_5_200
-./run --runmode=init --workdir=/data/Zhurkin-20/analysis/5_RWPE_5u
-./run --runmode=init --workdir=/data/Zhurkin-20/analysis/6_RWPE_5_200
-./run --runmode=init --workdir=/data/Zhurkin-20/analysis/7_NB26_5u
-./run --runmode=init --workdir=/data/Zhurkin-20/analysis/8_NB26_5_200
+index_dir: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/indices"
+adaptors: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/adapters/TruSeq_and_nextera_adapters.fa"
+master_bed_file: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed" #path to the master bed that will  be used to create a selected_bed, if one is not provided

@@ -102,7 +102,6 @@ rule merge_DACs:
 
         # for each output DAC file, join 
         for f in ${{file_list[@]}}; do
-            echo "working $f"
             if [[ $counter -eq 0 ]]; then
                 echo "working on $f" 
                 cat $f > $tmp_dir/join.tmp

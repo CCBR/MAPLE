@@ -15,7 +15,6 @@ rule build_index_files:
     params:
         rname="create_index_file",
         index_dir=INDEX_LOCATION,
-        index_shorthand=INDEX[species][reference_source]["shorthand"],
         source_link=INDEX[species][reference_source]["source"],
         sp = config["species"],
         ref_type = config["reference_source"]
@@ -28,10 +27,10 @@ rule build_index_files:
         
         # unzip the dir
         cd {params.index_dir}
-        gunzip {params.index_dir}/${params.index_shorthand}.zip
+        gunzip {params.index_dir}/*.zip
         
         # run the sh file
-        cd {params.index_dir}/{params.index_shorthand}
+        cd {params.index_dir}/*
         sh make_${params.sp}.sh
 
         # remove fastas

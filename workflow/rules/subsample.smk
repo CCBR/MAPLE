@@ -1,3 +1,14 @@
+def get_selected_bed(wildcards):
+    # read in bed_list
+    bed_list=join(WORKDIR,"resources","bed_lists.csv")
+    bed_df = pd.read_csv(bed_list)
+    
+    # subset for selected_shorthand
+    df_sub = bed_df[(bed_df['selected_shorthand']==wildcards.selected_shorthand)]
+
+    # return full path of bedfile
+    return(df_sub.iloc[0]['selected_bed'])
+
 rule select_bed:
     '''
     Create a sub-selected bed file based on user input
@@ -7,7 +18,7 @@ rule select_bed:
     '''
     input:
         bed=rules.alignment.output.bed,
-        interval_bed=config["selected_bed"]
+        interval_bed=get_selected_bed
     envmodules:
         TOOLS["R"]["version"],
         TOOLS["bedtools"]["version"]
@@ -19,7 +30,7 @@ rule select_bed:
         f_min=config["fragment_length_min"],
         f_max=config["fragment_length_max"]
     output:
-        selected_bed=join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{species}.{min_length}-{max_length}.{selected_shorthand}.bed')
+        selected_bed=temp(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{species}.{min_length}-{max_length}.{selected_shorthand}.bed'))
     shell:
         """
         tmp_dir="/lscratch/${{SLURM_JOB_ID}}"

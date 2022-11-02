@@ -1,11 +1,4 @@
-# set selection shorthand
-selected_shorthand=config["selected_shorthand"]
-
-# set min / max lengths of fragment
-min_length=config["fragment_length_min"]
-max_length=config["fragment_length_max"]
-
- # set output location
+# set output location
 output_contrast_location=config["output_contrast_location"]
 
 rule calculate_DYADs:

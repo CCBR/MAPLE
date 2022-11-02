@@ -172,19 +172,25 @@ getmemG=lambda rname:getmemg(rname).replace("g","G")
 # if user specifies to create a selected_bed
 check_readaccess(config["master_bed_file"])
 
+# set selection shorthand
+bed_list=join(WORKDIR,"resources","bed_lists.csv",)
+bed_df = pd.read_csv(bed_list)
+selected_shorthand=bed_df['selected_shorthand'].tolist()
+selected_bedfiles=bed_df['selected_bed'].tolist()
+
 #########################################################
 
 #########################################################
 # fragment size
 #########################################################
-FRAGMENT_LENGTH_MIN=config["fragment_length_min"]
-FRAGMENT_LENGTH_MAX=config["fragment_length_max"]
+min_length=config["fragment_length_min"]
+max_length=config["fragment_length_max"]
 
-if not FRAGMENT_LENGTH_MIN.isnumeric() and FRAGMENT_LENGTH_MAX.isnumeric():
-  raise Error("fragment_length_min and fragment_length_max must be integers")
+if not min_length.isnumeric() and max_length.isnumeric():
+  raise Error("min_length and max_length must be integers")
 else:
-  if not FRAGMENT_LENGTH_MAX > FRAGMENT_LENGTH_MIN:
-    raise Error("fragment_length_min must be larger than fragment_length_max")
+  if not max_length > min_length:
+    raise Error("min_length must be larger than max_length")
 
 #########################################################
 # SET OTHER PIPELINE GLOBAL VARIABLES

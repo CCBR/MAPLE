@@ -1,26 +1,28 @@
-selected_shorthand=config["selected_shorthand"]
+def get_selected_bed(wildcards):
+    # read in bed_list
+    bed_list=join(WORKDIR,"resources","bed_lists.csv")
+    bed_df = pd.read_csv(bed_list)
+    
+    # subset for selected_shorthand
+    df_sub = bed_df[(bed_df['selected_shorthand']==wildcards.selected_shorthand)]
+
+    # return full path of bedfile
+    return(df_sub.iloc[0]['selected_bed'])
 
 rule create_bed_file:
-    '''
-    If a bed file has not already been created for target gene_list, then create it
-    If it has been created then copy it to the working dir
+    '''    
+    Copy the bed file to the working dir
     '''
     input:
         master=config["master_bed_file"],
-    threads: getthreads("create_bed_file")
+        bed_file=get_selected_bed
+    threads: 
+        getthreads("create_bed_file")
     params:
         rname="create_bed_file",
-        gene_list=config["genes_of_interest"],
-        selected_bed=config["selected_bed"],
-        selected_shorthand=config["selected_shorthand"]
     output:
-        selected_bed=join(RESULTSDIR,'00_selected_bed',selected_shorthand + '.bed'),
+        selected_bed=temp(join(RESULTSDIR,'00_selected_bed','{selected_shorthand}.bed'))
     shell:
         """
-        # if the selected bed file does not exist, then create it
-        if [[ ! -f {params.selected_bed} ]]; then
-            grep -Fwf {params.gene_list} {input.master} | awk -v OFS='\t' '{{print $1,$2,$3}}'> {output.selected_bed}
-        else
-            cp {params.selected_bed} {output.selected_bed}
-        fi
+        cp {input.bed_file} {output.selected_bed}
         """

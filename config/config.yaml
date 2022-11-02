@@ -21,16 +21,16 @@ pipeline_phase: "first_pass" #first_pass, second_pass, third_pass
 
 ###### second_pass required
 # User may change the selected-bed file to include a different bed file to subset samples
-# if this bed file does not yet exist, provide a genes_of_interest file and it will be created
-# must provide a shorthand to describe this subset bedfile
-selected_bed: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed" #bed file with intervals of interest to subset data
-selected_shorthand: "proteinCoding" #shorthand name to use for subsequent file tracking
-genes_of_interest: "/path/to/dir/genes_of_interest.txt" # single column text file of genes of interest
+# this file is located in WORKDIR/resources/bed_lists.csv file and includes a shorthand name
+# for the list, and the full path to the bed file
 
-# selected_bed: "/data/CCBR_Pipeliner/ccbr1214/bed_files/1000.Genes.ALU-rich.bed" #bed file with intervals of interest to subset data
-# selected_shorthand: "1000_ALUrich" #shorthand name to use for subsequent file tracking
-# selected_bed: "/data/CCBR_Pipeliner/ccbr1214/bed_files/2500.Genes.ALU-depleted.bed" #bed file with intervals of interest to subset data
-# selected_shorthand: "2500_ALUdepleted" #shorthand name to use for subsequent file tracking
+# selected_shorthand,selected_bed
+# proteinCoding,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed
+# 1000_ALUrich,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/1000.Genes.ALU-rich.bed
+# 2500_ALUdepleted,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/2500.Genes.ALU-depleted.bed
+
+# if the file has not been created then create it
+# grep -Fwf $gene_list $master_bed_file | awk -v OFS='\t' '{{print $1,$2,$3}}'> $selected_bed_file
 
 fragment_length_min: "140" #minimum fragment length
 fragment_length_max: "160" #maximum fragment length

@@ -1,5 +1,7 @@
 from os.path import join
 from telnetlib import theNULL
+import pandas as pd
+
 include: join("rules","init.smk")
 include: join("rules","build_index.smk")
 include: join("rules","generate_bed.smk")
@@ -12,13 +14,6 @@ species=config["species"]
 
 # set reference source
 reference_source=config["reference_source"]
-
-# set selection shorthand
-selected_shorthand=config["selected_shorthand"]
-
-# set min / max lengths of fragment
-min_length=config["fragment_length_min"]
-max_length=config["fragment_length_max"]
 
 # create sample list
 SAMPLE_LIST='_and_'.join(SAMPLES)
@@ -53,7 +48,7 @@ if (pipeline_phase == "first_pass"):
 elif (pipeline_phase=="second_pass"):
     output_files=[
         # shorthand bed file 
-        expand(join(RESULTSDIR,'00_selected_bed','{shorthand}.bed'),shorthand=selected_shorthand),
+        expand(join(RESULTSDIR,'00_selected_bed','{selected_shorthand}.bed'),selected_shorthand=selected_shorthand),
         
         # subselect bed file
         expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.bed'), sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),

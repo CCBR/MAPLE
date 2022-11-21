@@ -14,8 +14,8 @@ rule trim_adaptors:
         rname="trim_adaptors",
         adaptors=config["adaptors"]
     output:
-        f1=join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),
-        f2=join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz')
+        f1=temp(join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz')),
+        f2=temp(join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz'))
     shell:
         """
         cutadapt -j 32 -b file:{params.adaptors} -B file:{params.adaptors} --trim-n -m 50 -o {output.f1} -p {output.f2} {input.f1} {input.f2}

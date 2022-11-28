@@ -54,6 +54,39 @@ python DAC.py ${output}.DYADs.hist ${limit} ${max_dist} ${output}.DAC.csv
 average_length=$(awk '{ SUM += ($3-$2); n++} END {print(int(SUM/n))}' intervals_of_interests.bed)
 python DAC_denominator.py ${output}.DYADs.his ${limit} ${max_dist} ${average_length} ${output}.DAC.csv
 
+## COUNT NSM FRAGMENTS IN GENES ##
+
+
+awk '{ if ($3-$2 >= 120 && $3-$2 < 130) print $0}' ${output}.mapped.hg19.bed > ${output}.mapped.120-130.hg19.bed
+bedtools intersect -wo -a ${output}.mapped.120-130.hg19.bed  -b hg19_protein-coding_genes.bed > ${output}.120-130.InGenes.hg19.bed
+python3 COUNT_NSMS_IN_GENES.py ${output}.120-130.InGenes.hg19.bed ${output}.120-130.InGenes ${output}.120-130.InGenes.hg19.counts.csv
+
+awk '{ if ($3-$2 >= 130 && $3-$2 < 140) print $0}' ${output}.mapped.hg19.bed > ${output}.mapped.130-140.hg19.bed 
+bedtools intersect -wo -a ${output}.mapped.130-140.hg19.bed  -b hg19_protein-coding_genes.bed > ${output}.130-140.InGenes.hg19.bed
+python3 COUNT_NSMS_IN_GENES.py ${output}.130-140.InGenes.hg19.bed ${output}.130-140.InGenes ${output}.130-140.InGenes.hg19.counts.csv
+
+awk '{ if ($3-$2 >= 140 && $3-$2 < 150) print $0}' ${output}.mapped.hg19.bed > ${output}.mapped.140-150.hg19.bed 
+bedtools intersect -wo -a ${output}.mapped.140-150.hg19.bed  -b hg19_protein-coding_genes.bed > ${output}.140-150.InGenes.hg19.bed
+python3 COUNT_NSMS_IN_GENES.py ${output}.140-150.InGenes.hg19.bed ${output}.140-150.InGenes ${output}.140-150.InGenes.hg19.counts.csv
+
+awk '{ if ($3-$2 >= 150 && $3-$2 < 160) print $0}' ${output}.mapped.hg19.bed > ${output}.mapped.150-160.hg19.bed 
+bedtools intersect -wo -a ${output}.mapped.150-160.hg19.bed  -b hg19_protein-coding_genes.bed > ${output}.150-160.InGenes.hg19.bed
+python3 COUNT_NSMS_IN_GENES.py ${output}.150-160.InGenes.hg19.bed ${output}.150-160.InGenes ${output}.150-160.InGenes.hg19.counts.csv
+
+awk '{ if ($3-$2 >= 160 && $3-$2 < 170) print $0}' ${output}.mapped.hg19.bed > ${output}.mapped.160-170.hg19.bed 
+bedtools intersect -wo -a ${output}.mapped.160-170.hg19.bed  -b hg19_protein-coding_genes.bed > ${output}.160-170.InGenes.hg19.bed
+python3 COUNT_NSMS_IN_GENES.py ${output}.160-170.InGenes.hg19.bed ${output}.80-140.InGenes ${output}.160-170.InGenes.hg19.counts.csv
+
+awk '{ if ($3-$2 >= 170 && $3-$2 < 180) print $0}' ${output}.mapped.hg19.bed > ${output}.mapped.170-180.hg19.bed 
+bedtools intersect -wo -a ${output}.mapped.170-180.hg19.bed  -b hg19_protein-coding_genes.bed > ${output}.170-180.InGenes.hg19.bed
+python3 COUNT_NSMS_IN_GENES.py ${output}.170-180.InGenes.hg19.bed ${output}.80-140.InGenes ${output}.170-180.InGenes.hg19.counts.csv
+
+
+
+
+
+
+
 
 ###################################
 sh run --runmode=init --workdir=/data/sevillas2/ccbr1214/test

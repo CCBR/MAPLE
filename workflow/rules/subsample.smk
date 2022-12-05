@@ -57,11 +57,25 @@ rule selected_hist_frags:
     threads: getthreads("hist_frags")
     params:
         rname="hist_frags_select",
-        rscript=join(WORKDIR,"scripts","hist.r")
+        rscript=join(WORKDIR,"scripts","hist.r"),
+        localtmp=join(RESULTSDIR,'tmp','select_frags'),
     output:
         hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{species}.length_hist.{min_length}-{max_length}.{selected_shorthand}.csv'),
         png=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{species}.length_hist.{min_length}-{max_length}.{selected_shorthand}.png')
     shell:
         """
-        Rscript {params.rscript} {input.bed} {output.hist} {output.png}
+        tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
+        if [[ ! -d $tmp_dir ]]; then
+            tmp_dir={params.localtmp}
+            if [[ -d $tmp_dir ]]; then rm -r $tmp_dir; fi 
+            mkdir -p $tmp_dir
+        fi
+        
+        # subset bed file to include only columns needed
+        awk -v OFS='\t' '{{print $1,$2,$3}}' {input.bed} > $tmp_dir/tmp.bed
+
+        # calculate length
+        awk '{{$4 = ($3-$2); print}}' $tmp_dir/tmp.bed > $tmp_dir/tmp1.bed
+        
+        Rscript {params.rscript} $tmp_dir/tmp1.bed {output.hist} {output.png}
         """

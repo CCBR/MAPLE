@@ -1,0 +1,8 @@
+selected_shorthand,selected_bed
+proteinCoding,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed
+1000_ALUrich,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/1000.Genes.ALU-rich.bed
+2500_ALUdepleted,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/2500.Genes.ALU-depleted.bed
+GENES_2000_Length,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/GENES_2000_Length.bed
+GENES_2000_AT,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/GENES_2000_AT.bed
+GENES_2000_GC,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/GENES_2000_GC.bed
+GENES_2000_ALU,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/GENES_2000_ALU.bed

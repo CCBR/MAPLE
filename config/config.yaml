@@ -5,12 +5,13 @@ workdir: "WORKDIR" #output will be in the results subfolder of the workdir
 
 # paths to manifest files
 samplemanifest: "WORKDIR/manifests/samples.tsv"
-contrastmanifest: "WORKDIR/manifests/contrasts.tsv"
 
 ########################################################################################
 #user parameters
 #########################################################################################
-###### Required
+########################
+# Required
+########################
 species: "hg19" #species hg19 or hg38
 reference_source: "usc" #NCBI or USC
 
@@ -19,7 +20,9 @@ reference_source: "usc" #NCBI or USC
 # third pass completes comparisons between multiple samples
 pipeline_phase: "first_pass" #first_pass, second_pass, third_pass
 
-###### second_pass required
+########################
+# second_pass required
+########################
 # User may change the selected-bed file to include a different bed file to subset samples
 # this file is located in WORKDIR/resources/bed_lists.csv file and includes a shorthand name
 # for the list, and the full path to the bed file
@@ -38,9 +41,14 @@ fragment_length_max: "160" #maximum fragment length
 limit: 1000000
 max_distance: 1500
 
-###### third required
+########################
+# third required
+########################
 # if selected the manifest/contrast_manifest.tsv must be completed
 output_contrast_location: "WORKDIR/merged_DACS" #"/data/Zhurkin-20/analysis/sent_to_pi/"
+contrastmanifest: "WORKDIR/manifests/contrasts.tsv"
+contrast_shorthand: ""
+
 #########################################################################################
 # reference files
 #########################################################################################

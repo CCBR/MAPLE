@@ -366,7 +366,7 @@ function run() {
 #SBATCH --job-name="ccbr1214"
 #SBATCH --mem=10g
 #SBATCH --partition="norm"
-#SBATCH --time=96:00:00
+#SBATCH --time=24:00:00
 #SBATCH --cpus-per-task=2
 #SBATCH --output=$WORKDIR/logs/${log_time}/00_%j_%x.out \
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -385,7 +385,7 @@ snakemake -s $SNAKEFILE \
 --printshellcmds \
 --latency-wait 120 \
 --configfile ${WORKDIR}/config.yaml \
---cluster-config ${PIPELINE_HOME}/resources/cluster.yaml \
+--cluster-config ${WORKDIR}/resources/cluster.yaml \
 --cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {cluster.name} --output $WORKDIR/logs/$log_time/{cluster.output} --error  $WORKDIR/logs/$log_time/{cluster.error}" \
 -j 500 \
 --rerun-incomplete \
@@ -415,7 +415,7 @@ EOF
     --verbose \
     --latency-wait 120 \
     --configfile ${WORKDIR}/config.yaml \
-    --cluster-config ${PIPELINE_HOME}/resources/cluster.yaml \
+    --cluster-config ${WORKDIR}/resources/cluster.yaml \
     --cluster "sbatch --gres {cluster.gres} --cpus-per-task {cluster.threads} -p {cluster.partition} -t {cluster.time} --mem {cluster.mem} --job-name {cluster.name} --output $WORKDIR/logs/$log_time/{cluster.output} --error  $WORKDIR/logs/$log_time/{cluster.error}" \
     -j 500 \
     --rerun-incomplete \

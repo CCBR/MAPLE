@@ -41,9 +41,62 @@ if [[ $flag_stage == "create_bed" ]]; then
     #rm $gene_list.tmp 
 fi
 
-#prep samples
-sample_list=("1_Kid_norm_5u" "2_Kid_norm_5_200u" "3_Kid_tumor_5u" "4_Kid_tumor_5_200")
-if [[ $flag_stage == "pipe_prep" ]]; then
+#########################################################################################################################
+# prep fastq
+#########################################################################################################################
+# ### rawdata / links
+if [[ $flag_stage == "create_links" ]]; then
+    project_id="ccbr1214";\
+    sub_id="kid_batch2"
+    raw_dir="/data/CCBR/rawdata/$project_id/$sub_id"; \
+    
+    proj_dir="/data/Zhurkin-20/rawdata/$sub_id"
+    if [[ ! -d $proj_dir ]]; then mkdir -p $proj_dir; fi
+    
+    # create links
+    for f in $raw_dir/*/*/*fastq.gz; do \
+        ln -s $f $proj_dir/$(basename "$f");\
+    done;\
+    ls $proj_dir/*
+
+    for f in $proj_dir/*.gz; do \
+        new_name=`echo $f | sed -s "s/_S[0-9][0-9]//g"`
+        new_name=`echo $new_name | sed -s "s/_S[0-9]//g"`
+        new_name=`echo $new_name | sed -s "s/_001//g"`
+        new_name=`echo $new_name | sed -s "s/_R/.R/g"`
+        mv $f $new_name
+    done;\
+    ls $proj_dir/*
+
+    # #create rename file
+    #col1 is old and col2 is new
+    ls $proj_dir/*fastq.gz | cut -f6 -d "/" > $proj_dir/file_rename.csv
+fi
+
+if [[ $flag_stage == "rename" ]]; then
+    project_id="ccbr1214";\
+    sub_id="kid_batch2"
+    raw_dir="/data/CCBR/rawdata/$project_id/$sub_id"; \
+    proj_dir="/data/Zhurkin-20/rawdata/$sub_id"; \
+
+    #rename from file col1 is old and col2 is new
+    echo "" >> $proj_dir/file_rename.csv
+    sed -e "s/\r//g" $proj_dir/file_rename.csv > $proj_dir/file_rename_clean.csv;\
+    while IFS=',' read -a files 
+    do
+        mv "$proj_dir/${files[0]}" "$proj_dir/${files[1]}"
+    done < $proj_dir/file_rename_clean.csv; \
+    
+    rm $proj_dir/file_rename.csv; \
+    ls $proj_dir/*
+fi
+
+#########################################################################################################################
+# pipeline init, dryrun, run
+#########################################################################################################################
+# pipeline prep
+sample_list=("1_Kid2_norm_5u" "2_Kid2_norm_5_200u" "3_Kid2_tumor_5u" "4_Kid2_tumor_5_200" "5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200")
+if [[ $flag_stage == "pipe_init" ]]; then
     for f in ${sample_list[@]}; do
         echo "--$f"
 
@@ -61,6 +114,8 @@ if [[ $flag_stage == "pipe_prep" ]]; then
             type="nb26"
         elif [[ $type == "Kid" ]]; then
             type="kid"
+        elif [[ $type == "Kid2" || $type == "Kid3" ]]; then
+            type="kid_batch2"
         else
             type="rwpe"
         fi
@@ -73,11 +128,20 @@ if [[ $flag_stage == "pipe_prep" ]]; then
         echo -e "sampleName\ttype\tpath_to_R1_fastq\tpath_to_R2_fastq" > $analysis_dir/manifests/samples.tsv
         echo -e "$f\tkidney\t$fq1\t$fq2" >> $analysis_dir/manifests/samples.tsv
         cat $analysis_dir/manifests/samples.tsv
-
-        /home/sevillas2/git/ccbr1214/run --runmode=dryrun --workdir=$analysis_dir/
     done
 fi
 
+# pipeine dryrun
+if [[ $flag_stage == "pipe_dry" ]]; then
+    sample_list="${sample_list[0]} ${sample_list[4]}"
+    for f in ${sample_list[@]}; do
+        echo "--$f"
+
+        # dry run
+        analysis_dir="/data/Zhurkin-20/analysis/$f"        
+        /home/sevillas2/git/ccbr1214/run --runmode=dryrun --workdir=$analysis_dir/
+    done
+fi
 # run the pipeline
 if [[ $flag_stage == "pipe_run" ]]; then
     for f in ${sample_list[@]}; do
@@ -102,25 +166,3 @@ if [[ $flag_stage == "mv_samples" ]]; then
     done
 fi
 
-# ### rawdata / links
-if [[ $flag_stage == "create_links" ]]; then
-    project_id="ccbr1214";\
-    sub_id="kid"
-    raw_dir="/data/CCBR/rawdata/$project_id/$sub_id"; \
-    proj_dir="/data/Zhurkin-20/rawdata/$sub_id"; \
-    if [[ ! -d $proj_dir ]]; then mkdir -p $proj_dir; fi; \
-    for f in $raw_dir/*/*fastq.gz; do \
-        ln -s $f $proj_dir/$(basename "$f");\
-    done;\
-    ls $proj_dir/*
-
-    project_id="ccbr1214";\
-    for f in $proj_dir/*; do \
-        new_name=`echo $f | sed -s "s/_S[0-9][0-9]//g"`
-        new_name=`echo $new_name | sed -s "s/_S[0-9]//g"`
-        new_name=`echo $new_name | sed -s "s/_001//g"`
-        new_name=`echo $new_name | sed -s "s/_R/.R/g"`
-        mv $f $new_name
-    done;\
-    ls $proj_dir/*
-fi

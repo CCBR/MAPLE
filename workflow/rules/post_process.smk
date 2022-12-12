@@ -49,21 +49,23 @@ rule dyad_analysis:
         rname="dyad_analysis",
         dac_script=join(WORKDIR,"scripts","DAC.py"),
         dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
-        limit=config["limit"],
         max_d=config["max_distance"]
     output:
-        csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.{selected_shorthand}.DAC.csv'),
-        corrected_csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.{selected_shorthand}.DAC.corrected.csv'),
+        csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.csv'),
+        corrected_csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),
     shell:
         """
+        # set limit
+        limit=`echo {output.csv} | awk -F 'lim' '{{ print $2 }}' | cut -f1 -d"."`
+
         # compute auto-correlation
-        python {params.dac_script} {input.hist} {params.limit} {params.max_d} {output.csv}
+        python {params.dac_script} {input.hist} $limit {params.max_d} {output.csv}
         
         average_length=$(awk '{{ SUM += ($3-$2); n++}} END {{print(int(SUM/n))}}' {input.source_bed})
         echo "The average length is: $average_length"
         
         # correct based on length of genome
-        python {params.dac_corrected_script} {input.hist} {params.limit} {params.max_d} $average_length {output.corrected_csv}
+        python {params.dac_corrected_script} {input.hist} $limit {params.max_d} $average_length {output.corrected_csv}
         """
 
 rule merge_DACs:
@@ -79,7 +81,7 @@ rule merge_DACs:
         rname="merge_DACs",
         localtmp=join(RESULTSDIR,'tmp','merged'),
     output:
-        merged=join(output_contrast_location,'final_' + CONTRASTS_CLEAN_LIST + '.{min_length}-{max_length}.{selected_shorthand}.DAC.csv')
+        merged=join(output_contrast_location,'final_' + CONTRASTS_CLEAN_LIST + '.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.csv')
     shell:
         """
         tmp_dir="/lscratch/${{SLURM_JOB_ID}}"

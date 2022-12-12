@@ -99,7 +99,6 @@ rule all_hist_frags:
         localtmp=join(RESULTSDIR,'tmp','histo_frags'),
     output:
         hist=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{species}.length_hist.all.csv'),
-        png=join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{species}.length_hist.all.png')
     shell:
         """
         tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
@@ -115,5 +114,6 @@ rule all_hist_frags:
         # calculate length
         awk '{{$4 = ($3-$2); print}}' $tmp_dir/tmp.bed > $tmp_dir/tmp1.bed
 
-        Rscript {params.rscript} $tmp_dir/tmp1.bed {output.hist} {output.png}
+        # output histogram CSV
+        Rscript {params.rscript} $tmp_dir/tmp1.bed {output.hist}
         """

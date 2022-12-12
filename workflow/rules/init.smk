@@ -193,6 +193,14 @@ else:
     raise Error("min_length must be larger than max_length")
 
 #########################################################
+# fragment size
+#########################################################
+LIMITSIZE=config["limit"]
+LIMITSIZE=list(map(lambda x:x.strip(),LIMITSIZE.split(",")))
+
+#########################################################
+
+#########################################################
 # SET OTHER PIPELINE GLOBAL VARIABLES
 #########################################################
 print("# Pipeline Parameters:")

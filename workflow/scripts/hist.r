@@ -7,7 +7,6 @@ library(reshape2)
 args = commandArgs(trailingOnly=TRUE)
 input <- args[1]
 output_csv <- args[2]
-output_png <- args[3]
 
 #input <- "~/../../../Volumes/ccbr1214/analysis/7_ARPE_5u_MNase/results/03_aligned/02_bed/7_ARPE_5u_MNase.hg19.120-140.2500_ALUdepleted.bed"
 #output_csv <- "~/../../../Volumes/ccbr1214/analysis/7_ARPE_5u_MNase/results/03_aligned/03_histograms/7_ARPE_5u_MNase.hg19.length_hist.120-140.2500_ALUdepleted.csv"
@@ -30,7 +29,7 @@ p1 <- ggplot() + geom_histogram(data = data, aes(x=Length), color = 'black', fil
             panel.background = element_rect(fill = "transparent",colour = NA),
             plot.background = element_rect(fill = "transparent",colour = NA)) +
     labs(y='Counts', x='Length')
-ggsave(output_png,p1)
+#ggsave(output_png,p1)
 
 # pull data, save raw data
 pg <- ggplot_build(p1)

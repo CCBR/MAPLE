@@ -366,7 +366,7 @@ function run() {
 #SBATCH --job-name="ccbr1214"
 #SBATCH --mem=10g
 #SBATCH --partition="norm"
-#SBATCH --time=24:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --cpus-per-task=2
 #SBATCH --output=$WORKDIR/logs/${log_time}/00_%j_%x.out \
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -480,4 +480,4 @@ function main(){
 
 # call the main function
 
-main "$@"
+main "$

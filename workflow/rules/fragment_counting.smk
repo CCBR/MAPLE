@@ -52,7 +52,7 @@ rule fragment_analysis:
         min_frag=`echo {wildcards.min_max_list} | cut -f1 -d"_"`
         max_frag=`echo {wildcards.min_max_list} | cut -f2 -d"_"`
         
-        awk '{{ if ($3-$2 >= $min_frag && $3-$2 < $max_frag) print $0}}' {input.sample_bed} > $tmp_dir/mapped.bed
+        awk -v "min_frag=$min_frag" -v "max_frag=$max_frag" '{{ if ($3-$2 >= min_frag && $3-$2 < max_frag) print $0}}' {input.sample_bed} > $tmp_dir/mapped.bed
         bedtools intersect -wo -a $tmp_dir/mapped.bed  -b {input.protein_bed} > $tmp_dir/InGenes.bed
         python3 {params.dac_script} $tmp_dir/InGenes.bed {params.sample_id}.$min_frag-$max_frag {output.csv}
         """

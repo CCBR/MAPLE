@@ -1,6 +1,6 @@
 def get_selected_bed(wildcards):
     # read in bed_list
-    bed_list=join(WORKDIR,"resources","bed_lists.csv")
+    bed_list=join(WORKDIR,"resources",config["bed_list_name"])
     bed_df = pd.read_csv(bed_list)
     
     # subset for selected_shorthand

@@ -74,7 +74,14 @@ for f in ["samplemanifest"]:
 #########################################################
 # run script to check naming / fastq / metadata information is valid against requirements
 python_script = join(SCRIPTSDIR,"check_manifest.py")
-python_cmd= "python " + python_script + " " + RESULTSDIR + "/ " + config["samplemanifest"] + " " + config["contrastmanifest"]
+
+# if not running third pass, assume contrasts is default
+if config["pipeline_phase"] == "third_pass":
+    contrast_file=config["contrastmanifest"]
+else:
+    contrast_file=join(WORKDIR,"manifests","contrasts.csv")
+
+python_cmd= "python " + python_script + " " + RESULTSDIR + "/ " + config["samplemanifest"] + " " + contrast_file
 subprocess.call(python_cmd, shell=True)
 check_existence(join(RESULTSDIR,"manifest_qc_pass.txt"))
 #########################################################
@@ -173,7 +180,7 @@ getmemG=lambda rname:getmemg(rname).replace("g","G")
 check_readaccess(config["master_bed_file"])
 
 # set selection shorthand
-bed_list=join(WORKDIR,"resources","bed_lists.csv",)
+bed_list=join(WORKDIR,"resources",config["bed_list_name"])
 bed_df = pd.read_csv(bed_list)
 selected_shorthand=bed_df['selected_shorthand'].tolist()
 selected_bedfiles=bed_df['selected_bed'].tolist()

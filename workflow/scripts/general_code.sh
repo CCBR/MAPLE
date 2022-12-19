@@ -24,8 +24,8 @@ fi
 
 # create bed file
 if [[ $flag_stage == "create_bed" ]]; then
-    gene_list=$2
-    final_bed=$3
+    gene_list=/data/CCBR_Pipeliner/Pipelines/ccbr1214/gene_list/$2
+    final_bed=/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/$3
 
     # clean file
     #sed -e "s/\r//g" $gene_list > $gene_list.tmp
@@ -95,7 +95,19 @@ fi
 # pipeline init, dryrun, run
 #########################################################################################################################
 # pipeline prep
-sample_list=("1_Kid2_norm_5u" "2_Kid2_norm_5_200u" "3_Kid2_tumor_5u" "4_Kid2_tumor_5_200" "5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200")
+#sample_list=("1_Kid2_norm_5u" "2_Kid2_norm_5_200u" "3_Kid2_tumor_5u" "4_Kid2_tumor_5_200" "5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200")
+#sample_list=("5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200")
+sample_list=("1_Kid2_norm_5u" "2_Kid2_norm_5_200u" "3_Kid2_tumor_5u" "4_Kid2_tumor_5_200" "5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200" "1_Kid_norm_5u" "2_Kid_norm_5_200u" "3_Kid_tumor_5u" "4_Kid_tumor_5_200")
+
+#contrast_list=("1000_ALUrich" "1000_ALUrich" "2500_ALUdepleted" "GENES_2000_ALU" "GENES_2000_AT" "GENES_2000_GC" "GENES_2000_Length" "proteinCoding")
+contrast_list=("CDK11A" "CDK11B")
+
+range="140-160"
+min="140"
+max="160"
+
+lim="1000000"
+
 if [[ $flag_stage == "pipe_init" ]]; then
     for f in ${sample_list[@]}; do
         echo "--$f"
@@ -166,3 +178,54 @@ if [[ $flag_stage == "mv_samples" ]]; then
     done
 fi
 
+############################################################################ second pass
+# copies bed list to resource/dir for each sample; updates config to use this file
+if [[ $flag_stage == "prep_bedlist" ]]; then
+    for f in ${sample_list[@]}; do
+        echo "--$f"
+        master_list="/data/Zhurkin-20/analysis/1_Kid_norm_5u/resources/bed_lists_221218.csv"
+        resource_dir="/data/Zhurkin-20/analysis/$f/resources"
+        config_file="/data/Zhurkin-20/analysis/$f/config.yaml"
+        cp $master_list $resource_dir
+
+        sed -i "s/bed_lists.csv/bed_lists_221218.csv/" $config_file
+        sed -i "s/pipeline_phase: \"first_pass\"/pipeline_phase: \"second_pass\"/" $config_file
+        sed -i "s/pipeline_phase: \"third_pass\"/pipeline_phase: \"second_pass\"/" $config_file
+        sed -i "s/fragment_length_min: \"1[0-9]0\"/fragment_length_min: \"$min\"/" $config_file
+        sed -i "s/fragment_length_max: \"1[0-9]0\"/fragment_length_max: \"$max\"/" $config_file
+    done
+fi
+
+############################################################################ third pass
+# prepare contrast files in first samples /manifest/dir
+if [[ $flag_stage == "prep_contrasts" ]]; then
+    for c in ${contrast_list[@]}; do
+        contrast_manifest="/data/Zhurkin-20/analysis/${sample_list[0]}/manifests/contrast_$c.tsv"
+        if [[ -f $contrast_manifest ]]; then rm $contrast_manifest; fi
+        echo "DAC_files" > $contrast_manifest
+        
+        for f in ${sample_list[@]}; do
+            echo "/data/Zhurkin-20/analysis/$f/results/04_dyads/03_CSV/$f.hg19.$range.lim$lim.$c.DAC.corrected.csv" >> $contrast_manifest
+        done
+
+        cat $contrast_manifest
+    done
+fi
+
+# run contrasts
+if [[ $flag_stage == "run_contrasts" ]]; then
+
+    for c in ${contrast_list[@]}; do
+        contrast_manifest="/data/Zhurkin-20/analysis/${sample_list[0]}/manifests/contrast_$c.tsv"
+        if [[ -f $contrast_manifest ]]; then
+            sed -i "s/second_pass/third_pass/g" /vf/users/Zhurkin-20/analysis/${sample_list[0]}/config.yaml
+            sed -i "s/CONTRAST_FILL_IN/contrast_$c/g" /vf/users/Zhurkin-20/analysis/${sample_list[0]}/config.yaml
+            sed -i "s/SHORTHAND_FILL_IN/$c/" /vf/users/Zhurkin-20/analysis/${sample_list[0]}/config.yaml
+            
+            ../.././run --runmode=runlocal --workdir=/vf/users/Zhurkin-20/analysis/${sample_list[0]}
+
+            sed -i "s/contrast_$c/CONTRAST_FILL_IN/g" /vf/users/Zhurkin-20/analysis/${sample_list[0]}/config.yaml
+            sed -i "s/$c/SHORTHAND_FILL_IN/" /vf/users/Zhurkin-20/analysis/${sample_list[0]}/config.yaml
+        fi
+    done
+fi

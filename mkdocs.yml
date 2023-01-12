@@ -4,9 +4,9 @@ site_author: Samantha Sevilla, Ph.D.
 site_description: >-
   MAPLE Pipeline
 # Repository
-repo_name: CCBR/ccbr1214
-repo_url: https://github.com/CCBR/ccbr1214
-edit_uri: https://github.com/CCBR/ccbr1214/edit/main/docs/
+repo_name: CCBR/MAPLE
+repo_url: https://github.com/CCBR/MAPLE
+edit_uri: https://github.com/CCBR/MAPLE/edit/main/docs/
 
 # Copyright
 copyright: Copyright &copy; 2022 CCBR

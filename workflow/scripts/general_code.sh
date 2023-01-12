@@ -15,10 +15,10 @@ if [[ $flag_stage == "create_genelist" ]]; then
 
     awk -F"	" '{print $1,$2,$3}' 1000.Genes.ALU-rich.bed
 
-    reverse engineer gene list
+    #reverse engineer gene list
     awk 'FNR==NR{arr[$1,$2];next} (($1,$2) in arr)' 1000.Genes.ALU-rich.bed /data/CCBR_Pipeliner/ccbr1214/bed_files/hg19_protein-coding_genes.bed > 1000.Genes.ALU-rich.txt
 
-    create bed file
+    #create bed file
     grep -Fwf 1000.Genes.ALU-rich.txt /data/CCBR_Pipeliner/ccbr1214/bed_files/hg19_protein-coding_genes.bed | awk -v OFS='\t' '{print $1,$2,$3}'> final.bed; head final.bed
 fi
 
@@ -97,16 +97,22 @@ fi
 # pipeline prep
 #sample_list=("1_Kid2_norm_5u" "2_Kid2_norm_5_200u" "3_Kid2_tumor_5u" "4_Kid2_tumor_5_200" "5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200")
 #sample_list=("5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200")
-sample_list=("1_Kid2_norm_5u" "2_Kid2_norm_5_200u" "3_Kid2_tumor_5u" "4_Kid2_tumor_5_200" "5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200" "1_Kid_norm_5u" "2_Kid_norm_5_200u" "3_Kid_tumor_5u" "4_Kid_tumor_5_200")
+#sample_list=("1_Kid2_norm_5u" "2_Kid2_norm_5_200u" "3_Kid2_tumor_5u" "4_Kid2_tumor_5_200" "5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200" "1_Kid_norm_5u" "2_Kid_norm_5_200u" "3_Kid_tumor_5u" "4_Kid_tumor_5_200")
+sample_list=("5_Kid3_norm_5u" "6_Kid3_norm_5_200u" "7_Kid3_tumor_5u" "8_Kid3_tumor_5_200")
 
 #contrast_list=("1000_ALUrich" "1000_ALUrich" "2500_ALUdepleted" "GENES_2000_ALU" "GENES_2000_AT" "GENES_2000_GC" "GENES_2000_Length" "proteinCoding")
-contrast_list=("CDK11A" "CDK11B")
+#contrast_list=("CDK11A" "CDK11B")
+#contrast_list=("TP73" "P58")
+contrast_list=("TTC34")
 
-range="140-160"
-min="140"
-max="160"
+range="160-180"
+min="160"
+max="180"
 
 lim="1000000"
+
+bed_list_old="bed_lists_221219"
+bed_list_new="bed_lists_221223"
 
 if [[ $flag_stage == "pipe_init" ]]; then
     for f in ${sample_list[@]}; do
@@ -183,12 +189,12 @@ fi
 if [[ $flag_stage == "prep_bedlist" ]]; then
     for f in ${sample_list[@]}; do
         echo "--$f"
-        master_list="/data/Zhurkin-20/analysis/1_Kid_norm_5u/resources/bed_lists_221218.csv"
+        master_list="/data/Zhurkin-20/analysis/${sample_list[0]}/resources/$bed_list_new.csv"
         resource_dir="/data/Zhurkin-20/analysis/$f/resources"
         config_file="/data/Zhurkin-20/analysis/$f/config.yaml"
         cp $master_list $resource_dir
 
-        sed -i "s/bed_lists.csv/bed_lists_221218.csv/" $config_file
+        sed -i "s/$bed_list_old.csv/$bed_list_new.csv/" $config_file
         sed -i "s/pipeline_phase: \"first_pass\"/pipeline_phase: \"second_pass\"/" $config_file
         sed -i "s/pipeline_phase: \"third_pass\"/pipeline_phase: \"second_pass\"/" $config_file
         sed -i "s/fragment_length_min: \"1[0-9]0\"/fragment_length_min: \"$min\"/" $config_file

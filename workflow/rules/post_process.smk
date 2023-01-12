@@ -1,6 +1,105 @@
 # set output location
 output_contrast_location=config["output_contrast_location"]
 
+rule create_master_table:
+    '''
+    Create list of genes based on input bed file
+    For each gene calculate the DYAD and generate corrected, master_table output
+    NROW=max_distance and NCOL=number of genes in bed file
+    '''
+    input:
+        master_bed=config["bed_list_name"],
+        sample_bed=rules.alignment.output.bed,
+    envmodules:
+        TOOLS["bedtools"]["version"],
+        TOOLS["python37"]["version"]
+    threads: getthreads("create_master_table")
+    params:
+        rname="create_master_table",
+        localtmp=join(RESULTSDIR,'tmp','merged'),
+        position_script=join(WORKDIR,"scripts","WeigthedDYADposition.py"),
+        hist_script=join(WORKDIR,"scripts","uniq_position.py"),
+        dac_script=join(WORKDIR,"scripts","DAC.py"),
+        max_d=config["max_distance"],
+        dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
+    output:
+        master_table=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.master_table.DAC.corrected.csv'),
+    shell:
+        """
+        # create tmp dir to hold data
+        tmp_dir="/lscratch/${{SLURM_JOB_ID}}"
+        if [[ ! -d $tmp_dir ]]; then
+            tmp_dir={params.localtmp}
+            if [[ -d $tmp_dir ]]; then rm -r $tmp_dir; fi 
+            mkdir -p $tmp_dir
+        fi
+
+        #pull gene names from input gene list
+        awk \'{{print $4}}\' {input.master_bed} | sort | uniq > $tmp_dir/master_gene_list.csv
+
+        # for each gene calculate DYAD
+        while IFS=\',\' read -a gene 
+            do
+                # make dir for gene tmp files
+                mkdir $tmp_dir/$gene
+                
+                # create bed file of only gene info
+                gene_bed="$tmp_dir/$gene/$gene.bed"
+                cat {input.master_bed} | grep $gene > $gene_bed
+                
+                mapped_gene_bed="$tmp_dir/$gene/$gene.mapped.bed"
+                bedtools intersect -a {input.sample_bed} -b $gene_bed > $mapped_gene_bed
+        
+                # calculate DYADS
+                dyads="$tmp_dir/$gene/DYADs"
+                python3 {params.position_script} $mapped_gene_bed $dyads
+
+                # sort
+                echo "sorting"
+                sorted="$tmp_dir/$gene/sorted.DYADs"
+                sort -k1,1 -k2n,2 $dyads > $sorted
+
+                #create histogram
+                echo "histo"
+                hist="$tmp_dir/$gene/DYADs.hist"
+                python {params.hist_script} $sorted $hist
+
+                # set limit
+                limit=`echo {output.master_table} | awk -F 'lim' '{{ print $2 }}' | cut -f1 -d"."`
+
+                # compute auto-correlation
+                echo "computing"
+                csv="$tmp_dir/$gene/DAC.csv"
+                python {params.dac_script} $hist $limit {params.max_d} $csv
+                average_length=$(awk '{{ SUM += ($3-$2); n++}} END {{print(int(SUM/n))}}' $gene_bed))
+                echo "The average length is: $average_length"
+
+                echo "correcting"
+                corrected_csv="$tmp_dir/$gene/DAC.corrected.csv"
+                python {params.dac_corrected_script} $hist $limit {params.max_d} $average_length $corrected_csv
+
+                # change the col name to the gene name
+                echo "cleaning"
+                sed -i "s/DAC/$gene/g" $corrected_csv
+
+                # if the mater file doesn't exist, create it with the row names, otherwise, only add gene column
+                tmp_table="$tmp_dir/tmp_master_table.csv"
+                tmp_col="$tmp_dir/$gene/col.csv"
+                if [[ ! -f $master_set ]]; then
+                    cp $corrected_csv $tmp_table
+                else
+                    awk -F"," '{print $2}' $corrected_csv > $tmp_col
+                    paste -d',' $tmp_table $tmp_col > $tmp_table
+                fi
+
+                #cleanup
+                rm -rf $tmp_dir/$gene
+        done <  $tmp_dir/master_gene_list.csv
+
+        # move final file
+        cp $tmp_dir/tmp_master_table.csv {output.master_table}
+        """
+
 rule calculate_DYADs:
     '''
     Find fragment centers (DYADs) and make histogram (Occurrences)

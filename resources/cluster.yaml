@@ -17,3 +17,8 @@ assembly:
 dyad_analysis:
     mem: 300g
     time: 2-00:00:00
+
+create_master_table:
+    mem: 40g
+    time: 4-00:00:00
+    gres: lscratch:256

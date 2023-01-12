@@ -133,7 +133,13 @@ if config["pipeline_phase"]=="third_pass":
         save=contID.rsplit("/",1)[1]
         save=save.split(".",1)[0]
         clean_list.append(save)
-    CONTRASTS_CLEAN_LIST='_AND_'.join(clean_list)
+    contrast_list_joined='_AND_'.join(clean_list)
+    
+    # shorten filename
+    CONTRASTS_CLEAN_LIST = contrast_list_joined.replace("Kid", "K" )
+    CONTRASTS_CLEAN_LIST = CONTRASTS_CLEAN_LIST.replace("tumor", "t" )
+    CONTRASTS_CLEAN_LIST = CONTRASTS_CLEAN_LIST.replace("norm", "n" )
+
 else:
     CONTRAST_FILES=config["samplemanifest"]
     CONTRASTS_CLEAN_LIST=""
@@ -181,9 +187,10 @@ check_readaccess(config["master_bed_file"])
 
 # set selection shorthand
 bed_list=join(WORKDIR,"resources",config["bed_list_name"])
-bed_df = pd.read_csv(bed_list)
-selected_shorthand=bed_df['selected_shorthand'].tolist()
-selected_bedfiles=bed_df['selected_bed'].tolist()
+if (config["master_table"] == "N"):
+    bed_df = pd.read_csv(bed_list)
+    selected_shorthand=bed_df['selected_shorthand'].tolist()
+    selected_bedfiles=bed_df['selected_bed'].tolist()
 
 #########################################################
 

@@ -64,19 +64,25 @@ if (pipeline_phase == "first_pass"):
         expand(join(RESULTSDIR,'03_aligned','04_counts','{sample_id}.{sp}.{min_max_list}.InGenes.counts.csv'),sample_id=SAMPLES, sp=species,min_max_list=min_max_list),
     ]
 elif (pipeline_phase=="second_pass"):
-    output_files=[
-        # shorthand bed file 
-        expand(join(RESULTSDIR,'00_selected_bed','{selected_shorthand}.bed'),selected_shorthand=selected_shorthand),
-        
-        # subselect bed file
-        expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.bed'), sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
+    if (config["master_table"] == "N"): 
+        output_files=[
+            # shorthand bed file 
+            expand(join(RESULTSDIR,'00_selected_bed','{selected_shorthand}.bed'),selected_shorthand=selected_shorthand),
+            
+            # subselect bed file
+            expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.bed'), sample_id=SAMPLES, sp=species, min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
 
-        # DYAD analysis
-        expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.DYADs'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
-        expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, limit=LIMITSIZE,selected_shorthand=selected_shorthand),
-    ]
+            # DYAD analysis
+            expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.DYADs'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
+            expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, limit=LIMITSIZE,selected_shorthand=selected_shorthand),
+        ]
+    else:
+        output_files=[ 
+            # DYAD analysis
+            expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{min_length}-{max_length}.lim{limit}.master_table.DAC.corrected.csv'),sample_id=SAMPLES, sp=species,min_length=min_length, max_length=max_length, limit=LIMITSIZE),
+        ]
 elif (pipeline_phase=="third_pass"):
-# merge contrasts
+    # merge contrasts
     output_files=[
         expand(join(output_contrast_location,'final_{ccl}.{min_length}-{max_length}.lim{limit}.{contrast_shorthand}.DAC.csv'),ccl=CONTRASTS_CLEAN_LIST, sp=species, min_length=min_length, max_length=max_length, limit=LIMITSIZE, contrast_shorthand=contrast_shorthand)
     ]

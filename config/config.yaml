@@ -10,7 +10,7 @@ samplemanifest: "WORKDIR/manifests/samples.tsv"
 #user parameters
 #########################################################################################
 ########################
-# Required
+# first pass required
 ########################
 species: "hg19" #species hg19 or hg38
 reference_source: "usc" #NCBI or USC
@@ -21,29 +21,37 @@ reference_source: "usc" #NCBI or USC
 pipeline_phase: "first_pass" #first_pass, second_pass, third_pass
 
 ########################
-# second_pass required
+# second pass required
 ########################
-# User may change the selected-bed file to include a different bed file to subset samples
-## file must be located /WORKDIR/resourcs/
-bed_list_name: "bed_lists.csv"
-## file includes a shorthand_/name,abosulte_path
-## example
-### selected_shorthand,selected_bed
-### NAME_FILL_IN,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed
-### NAME_FILL_IN,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/1000.Genes.ALU-rich.bed
-### NAME_FILL_IN,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/2500.Genes.ALU-depleted.bed
-
-# if the file has not been created then create it
-# grep -Fwf $gene_list $master_bed_file | awk -v OFS='\t' '{{print $1,$2,$3}}'> $selected_bed_file
-
 fragment_length_min: "140" #minimum fragment length
 fragment_length_max: "160" #maximum fragment length
 
 limit: 1000000
 max_distance: 1500
 
+# Require master_table
+master_table: "Y"
+
+## If master_table: "N"
+## User may change the selected-bed file to include a different bed file to subset samples
+### file must be located /WORKDIR/resourcs/
+## file includes a shorthand_/name,abosulte_path
+### selected_shorthand,selected_bed
+### NAME_FILL_IN,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed
+### NAME_FILL_IN,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/1000.Genes.ALU-rich.bed
+### NAME_FILL_IN,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/2500.Genes.ALU-depleted.bed
+bed_list_name: "bed_lists.csv"
+
+# if the file has not been created then create it
+# grep -Fwf $gene_list $master_bed_file | awk -v OFS='\t' '{{print $1,$2,$3}}'> $selected_bed_file
+
+## If master_table: "Y"
+# user must select a single bed file to run analysis
+### /data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed
+bed_list_name: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed"
+
 ########################
-# third required
+# third pass required
 ########################
 # if selected the manifest/contrast_manifest.tsv must be completed
 output_contrast_location: "WORKDIR/merged_DACS" #"/data/Zhurkin-20/analysis/sent_to_pi/"

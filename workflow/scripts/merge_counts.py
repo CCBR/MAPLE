@@ -1,23 +1,19 @@
 import pandas as pd
 import glob
-import sys
-from os import listdir
-from os.path import isfile, join
 
 # Get a list of all files that end in "counts.csv"
-countfiles = [f for f in listdir(sys.argv[1]) if isfile(join(sys.argv[1], f))]
-#countfiles = sys.argv[1]
-reffile = sys.argv[2]
-outputfile = sys.argv[3]
+countfiles = glob.glob("*counts.csv")
+reffile = 'hg19_protein-coding_genes.bed'
 
 # Create an empty list to hold the DataFrames
 dfs = []
 
 # Loop through the files and read them into a DataFrame
 for file in countfiles:
-    df = pd.read_csv(sys.argv[1]+ "/" + file)
+    df = pd.read_csv(file)
     df.columns = ['Hugo_Symbol', str('NSM_Count_'+file).replace('.InGenes.counts.csv', '')]
     dfs.append(df)
+
 
 # Merge the DataFrames on the "common_column"
 merged_df = pd.read_csv(reffile, sep = '\t')
@@ -26,4 +22,4 @@ merged_df.columns = ['Chrom', 'Start', 'End', 'Hugo_Symbol', 'Length', 'Strand',
 for df in dfs:
         merged_df = merged_df.merge(df, on='Hugo_Symbol')
 
-merged_df.to_csv(outputfile)
+merged_df.to_csv('Merged.NSM_counts.csv')

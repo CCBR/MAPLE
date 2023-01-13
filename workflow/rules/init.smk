@@ -220,6 +220,9 @@ LIMITSIZE=list(map(lambda x:x.strip(),LIMITSIZE.split(",")))
 print("# Pipeline Parameters:")
 SPECIES=config["species"]
 REF_SOURCE=config["reference_source"]
+
+NUMBEROFGENESLISTS=config["gene_list_n"]
+RANGEOFGENELISTS=list(range(1,config["gene_list_n"]+1))
 #########################################################
 
 #########################################################

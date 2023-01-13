@@ -81,7 +81,7 @@ awk '{ if ($3-$2 >= 170 && $3-$2 < 180) print $0}' ${output}.mapped.hg19.bed > $
 bedtools intersect -wo -a ${output}.mapped.170-180.hg19.bed  -b hg19_protein-coding_genes.bed > ${output}.170-180.InGenes.hg19.bed
 python3 COUNT_NSMS_IN_GENES.py ${output}.170-180.InGenes.hg19.bed ${output}.80-140.InGenes ${output}.170-180.InGenes.hg19.counts.csv
 
-
+python merge_counts.py 
 
 
 

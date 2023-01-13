@@ -197,14 +197,14 @@ if (config["master_table"] == "N"):
 #########################################################
 # fragment size
 #########################################################
-min_length=config["fragment_length_min"]
-max_length=config["fragment_length_max"]
+MIN_LENGTH=config["fragment_length_min"]
+MAX_LENGTH=config["fragment_length_max"]
 
-if not min_length.isnumeric() and max_length.isnumeric():
-  raise Error("min_length and max_length must be integers")
+if not MIN_LENGTH.isnumeric() and MAX_LENGTH.isnumeric():
+  raise Error("MIN_LENGTH and MAX_LENGTH must be integers")
 else:
-  if not max_length > min_length:
-    raise Error("min_length must be larger than max_length")
+  if not MAX_LENGTH > MIN_LENGTH:
+    raise Error("MIN_LENGTH must be larger than MAX_LENGTH")
 
 #########################################################
 # fragment size
@@ -221,6 +221,26 @@ print("# Pipeline Parameters:")
 SPECIES=config["species"]
 REF_SOURCE=config["reference_source"]
 
+# create sample list
+SAMPLE_LIST='_and_'.join(SAMPLES)
+
+# set pipeline phase
+PIPELINE_PHASE=config["pipeline_phase"]
+
+# create lists for fragment counting
+MIN_FRAG=list(range(120,180,10))
+MAX_FRAG=list(range(130,190,10))
+MIN_MAX_LIST=[]
+for min_f, max_f in zip(MIN_FRAG, MAX_FRAG):
+   MIN_MAX_LIST.append(str(min_f)+"_"+str(max_f))
+
+# set location for output_contrast
+OUTPUT_CONTRAST_PATH=config["output_contrast_location"]
+
+# set output for file contrast
+CONTRST_SHORTHAND=config["contrast_shorthand"]
+
+# gene numbers for master_table
 NUMBEROFGENESLISTS=config["gene_list_n"]
 RANGEOFGENELISTS=list(range(1,config["gene_list_n"]+1))
 #########################################################

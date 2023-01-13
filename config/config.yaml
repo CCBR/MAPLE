@@ -34,7 +34,7 @@ master_table: "Y"
 
 ## If master_table: "N"
 ## User may change the selected-bed file to include a different bed file to subset samples
-### file must be located /WORKDIR/resourcs/
+## file must be located /WORKDIR/resourcs/
 ## file includes a shorthand_/name,abosulte_path
 ### selected_shorthand,selected_bed
 ### NAME_FILL_IN,/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed
@@ -46,10 +46,12 @@ bed_list_name: "bed_lists.csv"
 # grep -Fwf $gene_list $master_bed_file | awk -v OFS='\t' '{{print $1,$2,$3}}'> $selected_bed_file
 
 ## If master_table: "Y"
-# user must select a single bed file to run analysis
+## user must select a single bed file to run analysis
 ### /data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed
 bed_list_name: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed"
 
+# the total number of gene lists to create
+gene_list_n: 7
 ########################
 # third pass required
 ########################

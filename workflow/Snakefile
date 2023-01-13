@@ -15,31 +15,9 @@ include: join("rules","master_table.smk")
 # other rules
 include: join("rules","build_index.smk")
 
-# set reference source
-reference_source=config["reference_source"]
-
-# create sample list
-SAMPLE_LIST='_and_'.join(SAMPLES)
-
-# set pipeline phase
-pipeline_phase=config["pipeline_phase"]
-
-# create lists for fragment counting
-min_frag=list(range(120,180,10))
-max_frag=list(range(130,190,10))
-min_max_list=[]
-for min_f, max_f in zip(min_frag, max_frag):
-   min_max_list.append(str(min_f)+"_"+str(max_f))
-
-# set location for output_contrast
-output_contrast_location=config["output_contrast_location"]
-
-# set output for file contrast
-contrast_shorthand=config["contrast_shorthand"]
-
 localrules: all
 
-if (pipeline_phase == "first_pass"):
+if (PIPELINE_PHASE == "first_pass"):
     output_files=[
         # index file
         GENOME_INDEX_FILE,
@@ -59,36 +37,38 @@ if (pipeline_phase == "first_pass"):
         expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.all.csv'),sample_id=SAMPLES, sp=SPECIES),
 
         # all fragment counts
-        expand(join(RESULTSDIR,'03_aligned','04_counts','{sample_id}.{sp}.{min_max_list}.InGenes.counts.csv'),sample_id=SAMPLES, sp=SPECIES,min_max_list=min_max_list),
+        # merge counts
+        expand(join(RESULTSDIR,'03_aligned','04_counts','{sample_id}.{sp}.{MIN_MAX_LIST}.InGenes.counts.csv'),sample_id=SAMPLES, sp=SPECIES,MIN_MAX_LIST=MIN_MAX_LIST),
+        expand(join(RESULTSDIR,'03_aligned','04_counts','{sample_id}.{sp}.merged.counts.csv'),sample_id=SAMPLES, sp=SPECIES),
     ]
-elif (pipeline_phase=="second_pass"):
+elif (PIPELINE_PHASE=="second_pass"):
     if (config["master_table"] == "N"): 
         output_files=[
             # shorthand bed file 
             expand(join(RESULTSDIR,'00_selected_bed','{selected_shorthand}.bed'),selected_shorthand=selected_shorthand),
             
             # subselect bed file
-            expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.bed'), sample_id=SAMPLES, sp=SPECIES, min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
+            expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{MIN_LENGTH}-{MAX_LENGTH}.{selected_shorthand}.bed'), sample_id=SAMPLES, sp=SPECIES, MIN_LENGTH=MIN_LENGTH, MAX_LENGTH=MAX_LENGTH, selected_shorthand=selected_shorthand),
 
             # DYAD analysis
-            expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.DYADs'),sample_id=SAMPLES, sp=SPECIES,min_length=min_length, max_length=max_length, selected_shorthand=selected_shorthand),
-            expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),sample_id=SAMPLES, sp=SPECIES,min_length=min_length, max_length=max_length, limit=LIMITSIZE,selected_shorthand=selected_shorthand),
+            expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{MIN_LENGTH}-{MAX_LENGTH}.{selected_shorthand}.DYADs'),sample_id=SAMPLES, sp=SPECIES,MIN_LENGTH=MIN_LENGTH, MAX_LENGTH=MAX_LENGTH, selected_shorthand=selected_shorthand),
+            expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{MIN_LENGTH}-{MAX_LENGTH}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),sample_id=SAMPLES, sp=SPECIES,MIN_LENGTH=MIN_LENGTH, MAX_LENGTH=MAX_LENGTH, limit=LIMITSIZE,selected_shorthand=selected_shorthand),
         ]
     else:
         output_files=[ 
-            #gene lists
-            expand(join(RESULTSDIR,"04_dyads","04_master_table","{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_0{n}.txt"),sample_id=SAMPLES, species=SPECIES,min_length=min_length, max_length=max_length, limit=LIMITSIZE,n=RANGEOFGENELISTS),
+            # fragmented bed file
+            expand(join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{MIN_LENGTH}-{MAX_LENGTH}.lim{limit}.fragmented_bed"),sample_id=SAMPLES, species=SPECIES,MIN_LENGTH=MIN_LENGTH, MAX_LENGTH=MAX_LENGTH, limit=LIMITSIZE),
 
             # indiv master_table
-            expand(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv'),sample_id=SAMPLES, species=SPECIES,min_length=min_length, max_length=max_length, limit=LIMITSIZE,n=RANGEOFGENELISTS),
+            expand(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{MIN_LENGTH}-{MAX_LENGTH}.lim{limit}.split_table_{n}.DAC.corrected.csv'),sample_id=SAMPLES, species=SPECIES,MIN_LENGTH=MIN_LENGTH, MAX_LENGTH=MAX_LENGTH, limit=LIMITSIZE,n=RANGEOFGENELISTS),
             
             # final master_table
-            expand(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.master_table.DAC.corrected.csv'),sample_id=SAMPLES, species=SPECIES,min_length=min_length, max_length=max_length, limit=LIMITSIZE),
+            expand(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{MIN_LENGTH}-{MAX_LENGTH}.lim{limit}.master_table.DAC.corrected.csv'),sample_id=SAMPLES, species=SPECIES,MIN_LENGTH=MIN_LENGTH, MAX_LENGTH=MAX_LENGTH, limit=LIMITSIZE),
         ]
-elif (pipeline_phase=="third_pass"):
+elif (PIPELINE_PHASE=="third_pass"):
     # merge contrasts
     output_files=[
-        expand(join(output_contrast_location,'final_{ccl}.{min_length}-{max_length}.lim{limit}.{contrast_shorthand}.DAC.csv'),ccl=CONTRASTS_CLEAN_LIST, sp=SPECIES, min_length=min_length, max_length=max_length, limit=LIMITSIZE, contrast_shorthand=contrast_shorthand)
+        expand(join(OUTPUT_CONTRAST_PATH,'final_{ccl}.{MIN_LENGTH}-{MAX_LENGTH}.lim{limit}.{CONTRST_SHORTHAND}.DAC.csv'),ccl=CONTRASTS_CLEAN_LIST, sp=SPECIES, MIN_LENGTH=MIN_LENGTH, MAX_LENGTH=MAX_LENGTH, limit=LIMITSIZE, CONTRST_SHORTHAND=CONTRST_SHORTHAND)
     ]
 
 rule all:

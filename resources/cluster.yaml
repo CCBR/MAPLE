@@ -19,6 +19,10 @@ dyad_analysis:
     time: 2-00:00:00
 
 create_master_table:
-    mem: 40g
-    time: 4-00:00:00
-    gres: lscratch:256
+    mem: 5g
+    time: 00-10:00:00
+
+create_indiv_master_table:
+    mem: 5g
+    threads: 4
+    time: 05-00:00:00

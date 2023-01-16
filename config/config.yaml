@@ -51,7 +51,7 @@ bed_list_name: "bed_lists.csv"
 bed_list_name: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/hg19_protein-coding_genes.bed"
 
 # the total number of gene lists to create
-gene_list_n: 7
+gene_list_n: 10
 ########################
 # third pass required
 ########################

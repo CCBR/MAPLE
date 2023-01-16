@@ -23,6 +23,6 @@ create_master_table:
     time: 00-10:00:00
 
 create_indiv_master_table:
-    mem: 5g
+    mem: 2g
     threads: 4
-    time: 05-00:00:00
+    time: 01-00:00:00

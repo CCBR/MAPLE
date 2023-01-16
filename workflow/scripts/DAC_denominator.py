@@ -66,7 +66,10 @@ while i < len(nestedlist):
 
 outfile.write('Dist,DAC\n')
 for dist in DAC:
-    try:
-        outfile.write(str(dist)+','+str(DAC[dist]/(length - dist + 1))+'\n')
+    try:    
+        file_output=str(dist)+','+str(DAC[dist]/(length - dist + 1))+'\n'
     except: # interval with no DYAD
-        outfile.write(str(dist)+',0\n')
+        file_output=str(dist)+',0\n'
+    outfile.write(file_output)
+
+outfile.close()

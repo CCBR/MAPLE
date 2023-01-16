@@ -32,6 +32,15 @@ rule create_master_gene_lists:
 
         # split the file
         split -l $number_of_genes --numeric-suffixes=1 --additional-suffix .txt {output.master_gene_list} {params.prefix}
+
+        # fix leading zero
+        for i in {{1..9}}; do
+            old_filename="{params.prefix}0$i.txt"
+            new_filename="{params.prefix}$i.txt"
+            if [[ -f $old_filename ]]; then
+                mv $old_filename $new_filename
+            fi
+        done
         """
 
 rule create_indiv_master_table:
@@ -56,10 +65,9 @@ rule create_indiv_master_table:
         dac_script=join(WORKDIR,"scripts","DAC.py"),
         max_d=config["max_distance"],
         dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
-        split_file=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_0{n}.txt")
+        split_file=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_{n}.txt")
     output:
         n_master_table=join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv'),
-        n_counts=join(RESULTSDIR,'03_aligned','04_counts','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.InGenes_counts_{n}.csv')
     shell:
         """
         # create tmp dir to hold data

@@ -18,11 +18,7 @@ dyad_analysis:
     mem: 300g
     time: 2-00:00:00
 
-create_master_table:
-    mem: 5g
-    time: 00-10:00:00
-
 create_indiv_master_table:
-    mem: 2g
-    threads: 4
-    time: 01-00:00:00
+    mem: 1g
+    threads: 2
+    time: 00-12:00:00

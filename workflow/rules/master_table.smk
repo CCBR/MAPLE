@@ -67,7 +67,7 @@ rule create_indiv_master_table:
         dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
         split_file=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_{n}.txt")
     output:
-        n_master_table=join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv'),
+        n_master_table=temp(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
     shell:
         """
         # create tmp dir to hold data
@@ -150,6 +150,7 @@ rule create_indiv_master_table:
 
                 #cleanup
                 rm -rf $tmp_dir/$gene
+                rm {params.split_file}
         done <  {params.split_file}
 
         # move final file
@@ -180,7 +181,7 @@ rule create_master_table:
         fi
 
         # split merged files into array
-        IFS=" " read -r -a master_table_list <<< {input.indiv_tables}
+        master_table_list=({input.indiv_tables})
 
         # for each of the merged files, merge into one final file
         tmp_master=$tmp_dir/tmp_master.csv
@@ -191,14 +192,19 @@ rule create_master_table:
                     cp $f $merged_master
                 else
                     # set the tmp table to be merged
-                    cp $merged_master $tmp_merged 
+                    cp $merged_master $tmp_master 
                     
-                    # remove teh first column
-                    cut -f2- $f > $tmp_col
+                    # remove the first column
+                    awk \'{{$1=""}}1\' $f | awk \'{{$1=$1}}1\'> $tmp_col
 
-                    paste -d"," $tmp_merged $tmp_col > $merged_master
+                    # paste remaining columns together
+                    paste -d"," $tmp_master $tmp_col > $merged_master
             fi
         done
+
+        # reformat
+        sed -i -e 's/\s\+/,/g' $merged_master 
+        sed -i -e 's/\t/,/g' $merged_master 
 
         # create final merged file
         cp $merged_master {output.master_table}

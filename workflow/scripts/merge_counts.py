@@ -24,6 +24,6 @@ merged_df = pd.read_csv(reffile, sep = '\t')
 merged_df.columns = ['Chrom', 'Start', 'End', 'Hugo_Symbol', 'Length', 'Strand', '# Exons', 'Locus_Type', 'GC', 'ATGC']
 
 for df in dfs:
-        merged_df = merged_df.merge(df, on='Hugo_Symbol')
+        merged_df = merged_df.merge(df, on='Hugo_Symbol', how="outer")
 
 merged_df.to_csv(outputfile)

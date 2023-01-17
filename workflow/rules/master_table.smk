@@ -1,4 +1,4 @@
-localrules: create_master_gene_lists
+localrules: create_master_gene_lists, create_master_table
 
 rule create_master_gene_lists:
     """
@@ -67,7 +67,7 @@ rule create_indiv_master_table:
         dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
         split_file=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_{n}.txt")
     output:
-        n_master_table=temp(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
+        n_master_table=(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
     shell:
         """
         # create tmp dir to hold data

@@ -67,7 +67,7 @@ rule create_indiv_master_table:
         dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
         split_file=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_{n}.txt")
     output:
-        n_master_table=(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
+        n_master_table=temp(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
     shell:
         """
         # create tmp dir to hold data
@@ -130,6 +130,7 @@ rule create_indiv_master_table:
                 merged_table="$tmp_dir/merged_master_table.csv"
                 tmp_table="$tmp_dir/tmp_master_table.csv"
                 tmp_col="$tmp_dir/$gene/col.csv"
+                tmp_col2="$tmp_dir/$gene/col2.csv"
 
                 # if the master file doesn't exist, create it with the row names, otherwise, only add gene column
                 if [[ ! -f $merged_table ]]; then
@@ -139,18 +140,23 @@ rule create_indiv_master_table:
                     # set the tmp table to be merged
                     cp $merged_table $tmp_table
 
-                    # round to 4 decimals
-                    # replace gene name
+                    # round to 5 decimals
+                    # remove the header
                     # pull the calculation col
-                    awk -F"," \'{{$2=sprintf("%.4f",$2)}}1\' $corrected_csv | sed "s/Dist 0.0000/Dist $gene/g" | awk \'{{print $2}}\' > $tmp_col
+                    # multiple this col by 10
+                    # round to 4 decimals
+                    awk -F"," \'{{$2=sprintf("%.5f",$2)}}1\' $corrected_csv | grep -v "Dist" | awk \'{{print $2}}\' | awk \'{{$1=$1*10; print $0}}\' | awk -F"," \'{{$1=sprintf("%.4f",$1)}}1\' > $tmp_col
+
+                    # add header then col file
+                    echo "Dist $gene" > $tmp_col2
+                    cat $tmp_col >> $tmp_col2
 
                     # add calc column to output
-                    paste -d" " $tmp_table $tmp_col > $merged_table
+                    paste -d" " $tmp_table $tmp_col2 > $merged_table
                 fi
 
                 #cleanup
                 rm -rf $tmp_dir/$gene
-                rm {params.split_file}
         done <  {params.split_file}
 
         # move final file

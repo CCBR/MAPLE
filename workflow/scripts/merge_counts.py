@@ -6,7 +6,6 @@ from os.path import isfile, join
 
 # Get a list of all files that end in "counts.csv"
 countfiles = [f for f in listdir(sys.argv[1]) if isfile(join(sys.argv[1], f))]
-#countfiles = sys.argv[1]
 reffile = sys.argv[2]
 outputfile = sys.argv[3]
 

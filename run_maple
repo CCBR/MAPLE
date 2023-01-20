@@ -363,7 +363,7 @@ function run() {
     # snakemake command below
     cat > ${WORKDIR}/logs/$log_time/submit_script.sbatch << EOF
 #!/bin/bash
-#SBATCH --job-name="ccbr1214"
+#SBATCH --job-name="MAPLE"
 #SBATCH --mem=10g
 #SBATCH --partition="norm"
 #SBATCH --time=2-00:00:00

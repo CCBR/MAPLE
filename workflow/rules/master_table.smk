@@ -134,8 +134,15 @@ rule create_indiv_master_table:
 
                 # if the master file doesn't exist, create it with the row names, otherwise, only add gene column
                 if [[ ! -f $merged_table ]]; then
-                    awk -F"," \'{{$2=sprintf("%.4f",$2)}}1\' $corrected_csv > $merged_table
-                    sed -i "s/Dist 0.0000/Dist $gene/g" $merged_table
+                    # round to 5 decimals
+                    # remove the header
+                    # pull the calculation col
+                    # multiple this col by 10
+                    # round to 4 decimals
+                    awk -F"," \'{{$2=sprintf("%.5f",$2)}}1\' $corrected_csv | grep -v "Dist" | awk \'{{print $2}}\' | awk \'{{$1=$1*10; print $0}}\' | awk -F"," \'{{$1=sprintf("%.4f",$1)}}1\' > $tmp_col
+                    
+                    echo "Dist $gene" > $merged_table
+                    cat $tmp_col >> $merged_table
                 else
                     # set the tmp table to be merged
                     cp $merged_table $tmp_table
@@ -148,7 +155,7 @@ rule create_indiv_master_table:
                     awk -F"," \'{{$2=sprintf("%.5f",$2)}}1\' $corrected_csv | grep -v "Dist" | awk \'{{print $2}}\' | awk \'{{$1=$1*10; print $0}}\' | awk -F"," \'{{$1=sprintf("%.4f",$1)}}1\' > $tmp_col
 
                     # add header then col file
-                    echo "Dist $gene" > $tmp_col2
+                    echo "$gene" > $tmp_col2
                     cat $tmp_col >> $tmp_col2
 
                     # add calc column to output

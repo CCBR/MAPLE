@@ -25,4 +25,9 @@ merged_df.columns = ['Chrom', 'Start', 'End', 'Hugo_Symbol', 'Length', 'Strand',
 for df in dfs:
         merged_df = merged_df.merge(df, on='Hugo_Symbol', how="outer")
 
-merged_df.to_csv(outputfile)
+# sort df by SYMBOL
+sorted_df=merged_df.sort_values(by=['Hugo_Symbol'], ascending=True)
+sorted_df.reset_index(drop=True, inplace=True)
+
+# output file
+sorted_df.to_csv(outputfile)

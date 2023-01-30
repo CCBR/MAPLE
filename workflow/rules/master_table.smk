@@ -1,5 +1,12 @@
 localrules: create_master_gene_lists, create_master_table
 
+def increase_time(wildcards, attempt):
+    if attempt == 1: 
+        clean_time="01-00:00:00"
+    else:
+        clean_time="0"+attempt+"-00:00:00"
+    return clean_time
+
 rule create_master_gene_lists:
     """
     Processing individual genes for master list is time consuming. This step will break the gene list into useable chunks for use 
@@ -57,6 +64,8 @@ rule create_indiv_master_table:
         TOOLS["bedtools"]["version"],
         TOOLS["python37"]["version"]
     threads: getthreads("create_indiv_master_table")
+    resources:
+        time=increase_time
     params:
         rname="create_indiv_master_table",
         localtmp=join(RESULTSDIR,'tmp','merged'),
@@ -67,7 +76,7 @@ rule create_indiv_master_table:
         dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
         split_file=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_{n}.txt")
     output:
-        n_master_table=temp(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
+        n_master_table=(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
     shell:
         """
         # create tmp dir to hold data
@@ -131,28 +140,21 @@ rule create_indiv_master_table:
                 tmp_table="$tmp_dir/tmp_master_table.csv"
                 tmp_col="$tmp_dir/$gene/col.csv"
                 tmp_col2="$tmp_dir/$gene/col2.csv"
+        
+                # round to 5 decimals
+                # remove the header
+                # pull the calculation col
+                # multiple this col by 10
+                # round to 4 decimals
+                awk -F"," \'{{$2=sprintf("%.5f",$2)}}1\' $corrected_csv | grep -v "Dist" | awk \'{{print $2}}\' | awk \'{{$1=$1*10; print $0}}\' | awk -F"," \'{{$1=sprintf("%.4f",$1)}}1\' > $tmp_col
 
                 # if the master file doesn't exist, create it with the row names, otherwise, only add gene column
                 if [[ ! -f $merged_table ]]; then
-                    # round to 5 decimals
-                    # remove the header
-                    # pull the calculation col
-                    # multiple this col by 10
-                    # round to 4 decimals
-                    awk -F"," \'{{$2=sprintf("%.5f",$2)}}1\' $corrected_csv | grep -v "Dist" | awk \'{{print $2}}\' | awk \'{{$1=$1*10; print $0}}\' | awk -F"," \'{{$1=sprintf("%.4f",$1)}}1\' > $tmp_col
-                    
-                    echo "Dist $gene" > $merged_table
+                    echo "$gene" > $merged_table
                     cat $tmp_col >> $merged_table
                 else
                     # set the tmp table to be merged
                     cp $merged_table $tmp_table
-
-                    # round to 5 decimals
-                    # remove the header
-                    # pull the calculation col
-                    # multiple this col by 10
-                    # round to 4 decimals
-                    awk -F"," \'{{$2=sprintf("%.5f",$2)}}1\' $corrected_csv | grep -v "Dist" | awk \'{{print $2}}\' | awk \'{{$1=$1*10; print $0}}\' | awk -F"," \'{{$1=sprintf("%.4f",$1)}}1\' > $tmp_col
 
                     # add header then col file
                     echo "$gene" > $tmp_col2
@@ -180,7 +182,8 @@ rule create_master_table:
     params:
         rname="create_master_table",
         localtmp=join(RESULTSDIR,'tmp','merged'),
-        outDIR=join(RESULTSDIR,'04_dyads','04_master_table')
+        outDIR=join(RESULTSDIR,'04_dyads','04_master_table'),
+        gene_lists=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_")
     output:
         master_table=join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.master_table.DAC.corrected.csv'),
     shell:
@@ -207,18 +210,60 @@ rule create_master_table:
                     # set the tmp table to be merged
                     cp $merged_master $tmp_master 
                     
-                    # remove the first column
-                    awk \'{{$1=""}}1\' $f | awk \'{{$1=$1}}1\'> $tmp_col
-
                     # paste remaining columns together
-                    paste -d"," $tmp_master $tmp_col > $merged_master
+                    paste -d"," $tmp_master $f > $merged_master
             fi
         done
 
         # reformat
         sed -i -e 's/\s\+/,/g' $merged_master 
-        sed -i -e 's/\t/,/g' $merged_master 
+        sed -i -e 's/\t/,/g' $merged_master
 
         # create final merged file
-        cp $merged_master {output.master_table}
+        ## create header
+        echo "Dist" > $tmp_dir/tmp_header
+        head -n1 $merged_master > $tmp_dir/tmp_header2
+        paste -d"," $tmp_dir/tmp_header $tmp_dir/tmp_header2 > $tmp_dir/final_header
+        
+        ## create distances only file
+        cat $merged_master | grep -v "A" > $tmp_dir/final_dists
+        
+        ## create rownum col
+        awk \'{{print NR}}\' $tmp_dir/final_dists > $tmp_dir/final_rownums
+
+        # create final file
+        ## paste rownums to distances
+        paste -d"," $tmp_dir/final_rownums $tmp_dir/final_dists > $tmp_dir/final_rowsnums_dists
+        ## add row names
+        cat $tmp_dir/final_header > $tmp_dir/cleaned_output
+        ## add distances
+        cat $tmp_dir/final_rowsnums_dists >> $tmp_dir/cleaned_output
+
+        # transpose the file, cleanup
+        awk -F"," \'
+        {{ 
+            for (i=1; i<=NF; i++)  {{
+                a[NR,i] = $i
+            }}
+        }}
+        NF>p {{ p = NF }}
+        END {{    
+            for(j=1; j<=p; j++) {{
+                str=a[1,j]
+                for(i=2; i<=NR; i++){{
+                    str=str" "a[i,j];
+                }}
+                print str
+            }}
+        }}\' $tmp_dir/cleaned_output > $tmp_dir/transposed_output.csv
+        sed -i -e 's/\s\+/,/g' $tmp_dir/transposed_output.csv
+        sed -i -e 's/\t/,/g' $tmp_dir/transposed_output.csv
+
+        # copy to completed file
+        cp $tmp_dir/transposed_output.csv {output.master_table}
+
+        # cleanup gene lists
+        if [[ -f ${params.gene_lists}* ]]; then
+            rm ${params.gene_lists}*
+        fi
         """

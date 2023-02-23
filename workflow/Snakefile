@@ -1,8 +1,79 @@
 from os.path import join
+from telnetlib import theNULL
+import pandas as pd
+import itertools
+
+# rule workflow order
 include: join("rules","init.smk")
+include: join("rules","generate_bed.smk")
+include: join("rules","pre_process.smk")
+include: join("rules","subsample.smk")
+include: join("rules","fragment_counting.smk")
+include: join("rules","post_process.smk")
+include: join("rules","master_table.smk")
+
+# other rules
+include: join("rules","build_index.smk")
 
 localrules: all
+
+if (PIPELINE_PHASE == "first_pass"):
+    output_files=[
+        # index file
+        GENOME_INDEX_FILE,
+        
+        # # trimming
+        # expand(join(RESULTSDIR,'01_trim','{sample_id}.R1.trimmed.fastq.gz'),sample_id=SAMPLES),
+        # expand(join(RESULTSDIR,'01_trim','{sample_id}.R2.trimmed.fastq.gz'),sample_id=SAMPLES),
+
+        # # assembly
+        # expand(join(RESULTSDIR,'02_assembled','{sample_id}.{sp}.assembled.fastq.gz'),sample_id=SAMPLES, sp=species),
+
+        # alignment
+        expand(join(RESULTSDIR,'03_aligned','01_bam','{sample_id}.{sp}.mapped.bam'),sample_id=SAMPLES, sp=SPECIES),
+        expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.mapped.bed'),sample_id=SAMPLES, sp=SPECIES),
+
+        # all histogram
+        expand(join(RESULTSDIR,'03_aligned','03_histograms','{sample_id}.{sp}.length_hist.all.csv'),sample_id=SAMPLES, sp=SPECIES),
+
+        # all fragment counts
+        # merge counts
+        expand(join(RESULTSDIR,'03_aligned','04_counts','{sample_id}.{sp}.{min_max_list}.InGenes.counts.csv'),sample_id=SAMPLES, sp=SPECIES,min_max_list=MIN_MAX_LIST),
+        expand(join(RESULTSDIR,'03_aligned','04_counts','{sample_id}.{sp}.merged.counts.csv'),sample_id=SAMPLES, sp=SPECIES),
+    ]
+elif (PIPELINE_PHASE=="second_pass"):
+    if (config["master_table"] == "N"): 
+        output_files=[
+            # shorthand bed file 
+            expand(join(RESULTSDIR,'00_selected_bed','{selected_shorthand}.bed'),selected_shorthand=selected_shorthand),
+            
+            # subselect bed file
+            expand(join(RESULTSDIR,'03_aligned','02_bed','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.bed'), sample_id=SAMPLES, sp=SPECIES, min_length=MIN_LENGTH, max_length=MAX_LENGTH, selected_shorthand=selected_shorthand),
+
+            # DYAD analysis
+            expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.DYADs'),sample_id=SAMPLES, sp=SPECIES,min_length=MIN_LENGTH, max_length=MAX_LENGTH, selected_shorthand=selected_shorthand),
+            expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),sample_id=SAMPLES, sp=SPECIES,min_length=MIN_LENGTH, max_length=MAX_LENGTH, limit=LIMITSIZE,selected_shorthand=selected_shorthand),
+        ]
+    else:
+        output_files=[ 
+            # gene list
+            expand(join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.master_gene_list.csv"),sample_id=SAMPLES, species=SPECIES,min_length=MIN_LENGTH, max_length=MAX_LENGTH, limit=LIMITSIZE),
+
+            # fragmented bed file
+            expand(join(RESULTSDIR,'03_aligned','02_bed',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.fragmented_bed"),sample_id=SAMPLES, species=SPECIES,min_length=MIN_LENGTH, max_length=MAX_LENGTH, limit=LIMITSIZE),
+
+            # indiv master_table
+            expand(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv'),sample_id=SAMPLES, species=SPECIES,min_length=MIN_LENGTH, max_length=MAX_LENGTH, limit=LIMITSIZE,n=RANGEOFGENELISTS),
+            
+            # final master_table
+            expand(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.master_table.DAC.corrected.csv'),sample_id=SAMPLES, species=SPECIES,min_length=MIN_LENGTH, max_length=MAX_LENGTH, limit=LIMITSIZE),
+        ]
+elif (PIPELINE_PHASE=="third_pass"):
+    # merge contrasts
+    output_files=[
+        expand(join(OUTPUT_CONTRAST_PATH,'final_{ccl}.{min_length}-{max_length}.lim{limit}.{CONTRST_SHORTHAND}.DAC.csv'),ccl=CONTRASTS_CLEAN_LIST, sp=SPECIES, min_length=MIN_LENGTH, max_length=MAX_LENGTH, limit=LIMITSIZE, CONTRST_SHORTHAND=CONTRST_SHORTHAND)
+    ]
+
 rule all:
     input:
-
-include: join("rules","dummy.smk")
+        output_files

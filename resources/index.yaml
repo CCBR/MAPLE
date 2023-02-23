@@ -1,0 +1,7 @@
+hg19: 
+  usc:
+    source: "https://genome-idx.s3.amazonaws.com/bt/hg19.zip"
+    generated: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/indices/hg19/hg19/hg19"
+  ncbi:
+    source: https://genome-idx.s3.amazonaws.com/bt/GRCh37.zip"
+    generated: "/data/CCBR_Pipeliner/Pipelines/ccbr1214/indices/hg19/GRCh37/GRCh37"

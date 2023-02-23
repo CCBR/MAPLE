@@ -1,0 +1,24 @@
+
+# cluster configuration
+__default__:
+    gres: lscratch:96
+    mem: 40g
+    partition: ccr,norm
+    time: 00-08:00:00
+    threads: 48
+    output: .%j.{params.rname}.{wildcards}.out
+    error: .%j.{params.rname}.{wildcards}.err
+    name: .{params.rname}.{wildcards}
+    
+assembly:
+    gres: lscratch:256
+    time: 02-00:00:00
+
+dyad_analysis:
+    mem: 300g
+    time: 2-00:00:00
+
+create_indiv_master_table:
+    mem: 1g
+    threads: 2
+    time: 00-12:00:00

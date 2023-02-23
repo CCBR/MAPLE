@@ -52,7 +52,7 @@ elif (PIPELINE_PHASE=="second_pass"):
 
             # DYAD analysis
             expand(join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{sp}.{min_length}-{max_length}.{selected_shorthand}.DYADs'),sample_id=SAMPLES, sp=SPECIES,min_length=MIN_LENGTH, max_length=MAX_LENGTH, selected_shorthand=selected_shorthand),
-            expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),sample_id=SAMPLES, sp=SPECIES,MIN_LENGTH=MIN_LENGTH, max_length=MAX_LENGTH, limit=LIMITSIZE,selected_shorthand=selected_shorthand),
+            expand(join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{sp}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),sample_id=SAMPLES, sp=SPECIES,min_length=MIN_LENGTH, max_length=MAX_LENGTH, limit=LIMITSIZE,selected_shorthand=selected_shorthand),
         ]
     else:
         output_files=[ 

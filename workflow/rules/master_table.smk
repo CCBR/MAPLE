@@ -76,7 +76,7 @@ rule create_indiv_master_table:
         dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
         split_file=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_{n}.txt")
     output:
-        n_master_table=(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
+        n_master_table=temp(join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.split_table_{n}.DAC.corrected.csv')),
     shell:
         """
         # create tmp dir to hold data
@@ -96,7 +96,7 @@ rule create_indiv_master_table:
                 
                 # subset master bed file for gene only info
                 gene_bed="$tmp_dir/$gene/$gene.bed"
-                cat {input.master_bed} | grep $gene > $gene_bed
+                cat {input.master_bed} | grep -w $gene > $gene_bed
                 
                 # create bed files of only gene info
                 echo "--bed"
@@ -148,6 +148,11 @@ rule create_indiv_master_table:
                 # round to 4 decimals
                 awk -F"," \'{{$2=sprintf("%.5f",$2)}}1\' $corrected_csv | grep -v "Dist" | awk \'{{print $2}}\' | awk \'{{$1=$1*10; print $0}}\' | awk -F"," \'{{$1=sprintf("%.4f",$1)}}1\' > $tmp_col
 
+                # save files for genes
+                if [[ $gene == "C3" ]] || [[ $gene == "TTC3" ]] || [[ $gene == "TTC34" ]]; then
+                    cp $tmp_col /data/sevillas2/tmp/master_table/$gene.csv
+                fi
+
                 # if the master file doesn't exist, create it with the row names, otherwise, only add gene column
                 if [[ ! -f $merged_table ]]; then
                     echo "$gene" > $merged_table
@@ -183,7 +188,8 @@ rule create_master_table:
         rname="create_master_table",
         localtmp=join(RESULTSDIR,'tmp','merged'),
         outDIR=join(RESULTSDIR,'04_dyads','04_master_table'),
-        gene_lists=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_")
+        gene_lists=join(RESULTSDIR,'04_dyads','04_master_table',"{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.gene_list_"),
+        sort_script=join(WORKDIR,"scripts","sort.py"),
     output:
         master_table=join(RESULTSDIR,'04_dyads','04_master_table','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.master_table.DAC.corrected.csv'),
     shell:
@@ -259,8 +265,10 @@ rule create_master_table:
         sed -i -e 's/\s\+/,/g' $tmp_dir/transposed_output.csv
         sed -i -e 's/\t/,/g' $tmp_dir/transposed_output.csv
 
-        # copy to completed file
-        cp $tmp_dir/transposed_output.csv {output.master_table}
+        # sort the file via python
+        ## NOTE: sort command in bash does not sort the same way that the reference master_table was created
+        ## using this script to sort them the same way for ease of use by PI
+        python {params.sort_script} $tmp_dir/transposed_output.csv {output.master_table}
 
         # cleanup gene lists
         if [[ -f ${params.gene_lists}* ]]; then

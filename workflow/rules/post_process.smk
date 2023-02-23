@@ -19,9 +19,9 @@ rule calculate_DYADs:
         position_script=join(WORKDIR,"scripts","WeigthedDYADposition.py"),
         hist_script=join(WORKDIR,"scripts","uniq_position.py"),
     output:
-        dyads=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{species}.{MIN_LENGTH}-{MAX_LENGTH}.{selected_shorthand}.DYADs'),
-        sorted=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{species}.{MIN_LENGTH}-{MAX_LENGTH}.{selected_shorthand}.sorted.DYADs'),
-        hist=join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.{species}.{MIN_LENGTH}-{MAX_LENGTH}.{selected_shorthand}.DYADs.hist'),
+        dyads=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{species}.{min_length}-{max_length}.{selected_shorthand}.DYADs'),
+        sorted=join(RESULTSDIR,'04_dyads','01_DYADs','{sample_id}.{species}.{min_length}-{max_length}.{selected_shorthand}.sorted.DYADs'),
+        hist=join(RESULTSDIR,'04_dyads','02_histograms','{sample_id}.{species}.{min_length}-{max_length}.{selected_shorthand}.DYADs.hist'),
     shell:
         """
         # calculate DYADS
@@ -51,8 +51,8 @@ rule dyad_analysis:
         dac_corrected_script=join(WORKDIR,"scripts","DAC_denominator.py"),
         max_d=config["max_distance"]
     output:
-        csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{MIN_LENGTH}-{MAX_LENGTH}.lim{limit}.{selected_shorthand}.DAC.csv'),
-        corrected_csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{MIN_LENGTH}-{MAX_LENGTH}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),
+        csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.csv'),
+        corrected_csv=join(RESULTSDIR,'04_dyads','03_CSV','{sample_id}.{species}.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.corrected.csv'),
     shell:
         """
         # set limit
@@ -81,7 +81,7 @@ rule merge_DACs:
         rname="merge_DACs",
         localtmp=join(RESULTSDIR,'tmp','merged'),
     output:
-        merged=join(output_contrast_location,'final_' + CONTRASTS_CLEAN_LIST + '.{MIN_LENGTH}-{MAX_LENGTH}.lim{limit}.{selected_shorthand}.DAC.csv')
+        merged=join(output_contrast_location,'final_' + CONTRASTS_CLEAN_LIST + '.{min_length}-{max_length}.lim{limit}.{selected_shorthand}.DAC.csv')
     shell:
         """
         tmp_dir="/lscratch/${{SLURM_JOB_ID}}"

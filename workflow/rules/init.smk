@@ -210,7 +210,7 @@ else:
 # fragment size
 #########################################################
 LIMITSIZE=config["limit"]
-LIMITSIZE=list(map(lambda x:x.strip(),LIMITSIZE.split(",")))
+#LIMITSIZE=list(map(lambda x:x.strip(),LIMITSIZE.split(",")))
 
 #########################################################
 

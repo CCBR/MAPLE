@@ -8,4 +8,4 @@ MasterTable = pd.read_csv(sys.argv[1])
 MasterTable = MasterTable.sort_values(by=['Dist'])
 
 # output the final table
-MasterTable.to_csv(sys.argv[2], index=False, sep = '\t')
+MasterTable.to_csv(sys.argv[2], index=False, sep = ',')

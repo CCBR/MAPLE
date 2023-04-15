@@ -6,3 +6,6 @@ site/
 *._*
 .DS*
 .R*
+
+# processing script
+workflow/scripts/general_code.sh

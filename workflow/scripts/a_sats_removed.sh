@@ -2,25 +2,34 @@
 # code changes tracked: https://github.com/CCBR/samantha_log/issues/184
 
 flag=$1
+batch_id=$2
+test=$3
 
-#120-140
-# sample_list=("2_Kid4_norm_5_200_10" "4_Kid4_tum1_5_200_10" "2_K5_nor_5_200_5" "4_K5_tum_5_200_5" "16_K8_nor_5_200" "18_K8_tum_5_200")
+if [[ $batch_id == "1" ]]; then
+    #120-140
+    sample_list=("2_Kid4_norm_5_200_10" "4_Kid4_tum1_5_200_10" "2_K5_nor_5_200_5" "4_K5_tum_5_200_5" "16_K8_nor_5_200" "18_K8_tum_5_200")
+    min_frag="120"
+    max_frag="140"
+else #140-160
+    sample_list=("1_Kid4_norm_5u_10" "3_Kid4_tum1_5u_10" "1_K5_nor_5u_5" "3_K5_tum_5u_5" "15_K8_nor_5u" "17_K8_tum_5u")
+    min_frag="140"
+    max_frag="160"
+fi
 
-#140-160
-# sample_list=("1_Kid4_norm_5u_10" "3_Kid4_tum1_5u_10" "1_K5_nor_5u_5" "3_K5_tum_5u_5" "15_K8_nor_5u" "17_K8_tum_5u")
-
-sample_list=("1_Kid4_norm_5u_10")
-min_frag="140"
-max_frag="160"
+# set params
 limit=100000
 max_frag_dist=1100
 
+# set global files/dir
 sats_bed="/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/a_sats_only.bed"
 pipeline_dir="/home/sevillas2/git/MAPLE/workflow/scripts"
+base_dir="/data/Zhurkin-20/analysis"
 
-# base_dir="/data/Zhurkin-20/analysis/"
-base_dir="/data/sevillas2/victor"
-
+# run tests
+if [[ $test == "Y" ]]; then
+    sample_list=("1_Kid4_norm_5u_10")
+    base_dir="/data/sevillas2/victor"
+fi
 
 if [[ $flag == "check_samples" ]]; then
     for f in ${sample_list[@]}; do
@@ -116,7 +125,7 @@ if [[ $flag == "submit_sh_cluster" ]]; then
         # submit
         sbatch --cpus-per-task=32 --verbose \
         --output=$base_dir/$f/logs/%j.out \
-        --mem=200g --gres=lscratch:450 --time 10:00:00 \
+        --mem=200g --gres=lscratch:450 --time 1-00:00:00 \
         --error=$base_dir/$f/logs/%j.err \
         $sh_file
     done

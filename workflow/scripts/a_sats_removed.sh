@@ -86,7 +86,7 @@ if [[ $flag == "create_sh" ]]; then
         sort -k1,1 -k2n,2 ${dyads} > ${dyads_sorted}
         head ${dyads_sorted}
         echo "--uniq pos"
-        python $pipeline_dir/Uniq_Position.py ${dyads_sorted} ${dyads_hist}
+        python $pipeline_dir/uniq_position.py ${dyads_sorted} ${dyads_hist}
         head ${dyads_hist}
 
         # Compute auto-correlation ###########

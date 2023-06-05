@@ -5,20 +5,40 @@ flag=$1
 batch_id=$2
 test=$3
 
+# sh a_sats_removed.sh create_sh 3
+# sh a_sats_removed.sh create_sh 4
+# sh a_sats_removed.sh submit_sh_cluster 3
+# sh a_sats_removed.sh submit_sh_cluster 4
+
 if [[ $batch_id == "1" ]]; then
     #120-140
     sample_list=("2_Kid4_norm_5_200_10" "4_Kid4_tum1_5_200_10" "2_K5_nor_5_200_5" "4_K5_tum_5_200_5" "16_K8_nor_5_200" "18_K8_tum_5_200")
     min_frag="120"
     max_frag="140"
-else #140-160
+    limit=100000
+    max_frag_dist=1100
+elif [[ $batch_id == "2" ]]; then 
+    #140-160
     sample_list=("1_Kid4_norm_5u_10" "3_Kid4_tum1_5u_10" "1_K5_nor_5u_5" "3_K5_tum_5u_5" "15_K8_nor_5u" "17_K8_tum_5u")
     min_frag="140"
     max_frag="160"
+    limit=100000
+    max_frag_dist=1100
+elif [[ $batch_id == "3" ]]; then 
+    #140-160
+    sample_list=("15_K8_nor_5u" "17_K8_tum_5u")
+    min_frag="140"
+    max_frag="160"
+    limit=20
+    max_frag_dist=1100
+elif [[ $batch_id == "4" ]]; then 
+    #140-160
+    sample_list=("15_K8_nor_5u" "17_K8_tum_5u")
+    min_frag="140"
+    max_frag="160"
+    limit=50
+    max_frag_dist=1100
 fi
-
-# set params
-limit=100000
-max_frag_dist=1100
 
 # set global files/dir
 sats_bed="/data/CCBR_Pipeliner/Pipelines/ccbr1214/bed_files/a_sats_only.bed"
@@ -58,17 +78,17 @@ if [[ $flag == "create_sh" ]]; then
         if [[ ! -d $tmp_dir ]]; then mkdir -p $tmp_dir; fi
 
         # set files
-        sh_file="$script_dir/$f.asatsremoved.$min_frag-$max_frag.sh"
+        sh_file="$script_dir/$f.asatsremoved.$min_frag-$max_frag.lim${limit}.sh"
 
         mapped_bed="$bed_dir/$f.hg19.mapped.bed"
         sats_removed_bed="$bed_dir/$f.hg19.sats_removed.bed"
         sats_removed_sub_bed="$bed_dir/$f.hg19.${min_frag}-${max_frag}.lim${limit}.sats_removed.bed"
 
-        dyads="$dyad_dir/$f.hg19.$min_frag-$max_frag.sats_removed.DYADs"
-        dyads_sorted="$dyad_dir/$f.hg19.$min_frag-$max_frag.sats_removed.DYADs.sorted"
-        dyads_hist="$hist_dir/$f.hg19.$min_frag-$max_frag.sats_removed.DYADs.hist"
+        dyads="$dyad_dir/$f.hg19.$min_frag-$max_frag.lim${limit}.sats_removed.DYADs"
+        dyads_sorted="$dyad_dir/$f.hg19.$min_frag-$max_frag.lim${limit}.sats_removed.DYADs.sorted"
+        dyads_hist="$hist_dir/$f.hg19.$min_frag-$max_frag.lim${limit},sats_removed.DYADs.hist"
         
-        csv="$csv_dir/$f.hg19.$min_frag-$max_frag.lim1000000.sats_removed.DAC.csv"
+        csv="$csv_dir/$f.hg19.$min_frag-$max_frag.lim${limit}.sats_removed.DAC.csv"
 
         echo "#!/bin/sh
         
@@ -95,6 +115,7 @@ if [[ $flag == "create_sh" ]]; then
 
         head ${csv}" > $sh_file
 
+        head $sh_file
     done
 fi
 
@@ -106,7 +127,7 @@ if [[ $flag == "submit_sh_local" ]]; then
         script_dir="$base_dir/$f/scripts"
 
         ## sh file
-        sh_file="$script_dir/$f.asatsremoved.$min_frag-$max_frag.sh"
+        sh_file="$script_dir/$f.asatsremoved.$min_frag-$max_frag.lim${limit}.sh"
         
         sh $sh_file
     done
@@ -120,7 +141,7 @@ if [[ $flag == "submit_sh_cluster" ]]; then
         script_dir="$base_dir/$f/scripts"
 
         ## sh file
-        sh_file="$script_dir/$f.asatsremoved.$min_frag-$max_frag.sh"
+        sh_file="$script_dir/$f.asatsremoved.$min_frag-$max_frag.lim${limit}.sh"
         
         # submit
         sbatch --cpus-per-task=32 --verbose \

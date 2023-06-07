@@ -5,10 +5,16 @@ flag=$1
 batch_id=$2
 test=$3
 
+# sh a_sats_removed.sh check_samples 5
+# sh a_sats_removed.sh check_samples 6
+
 # sh a_sats_removed.sh create_sh 3
 # sh a_sats_removed.sh create_sh 4
+# sh a_sats_removed.sh create_sh 5
+
 # sh a_sats_removed.sh submit_sh_cluster 3
 # sh a_sats_removed.sh submit_sh_cluster 4
+# sh a_sats_removed.sh submit_sh_cluster 5
 
 if [[ $batch_id == "1" ]]; then
     #120-140
@@ -38,6 +44,18 @@ elif [[ $batch_id == "4" ]]; then
     max_frag="160"
     limit=50
     max_frag_dist=1100
+elif [[ $batch_id == "5" ]]; then
+    sample_list=("1_Kid_norm_5u" "3_Kid_tumor_5u" "1_Kid2_norm_5u" "3_Kid2_tumor_5u" "5_Kid3_norm_5u" "7_Kid3_tumor_5u" "1_Kid4_norm_5u_10" "3_Kid4_tum1_5u_10" "1_K5_nor_5u_5" "3_K5_tum_5u_5" "5_K6_nor_5u_5" "6_K6_nor_5u" "8_K6_tum_5u_5" "9_K6_tum_5u" "11_K7_nor_5u" "13_K7_tum_5u" "2_Kid_norm_5_200u" "4_Kid_tumor_5_200" "2_Kid2_norm_5_200u" "4_Kid2_tumor_5_200" "6_Kid3_norm_5_200u" "8_Kid3_tumor_5_200" "2_Kid4_norm_5_200_10" "4_Kid4_tum1_5_200_10" "2_K5_nor_5_200_5" "4_K5_tum_5_200_5" "7_K6_nor_5_200" "10_K6_tum_5_200" "12_K7_nor_5_200" "14_K7_tum_5_200" "16_K8_nor_5_200" "18_K8_tum_5_200")
+    min_frag="140"
+    max_frag="160"
+    limit=20
+    max_frag_dist=1100
+elif [[ $batch_id == "6" ]]; then
+    sample_list=("5_K6_nor_5u_5" "6_K6_nor_5u" "8_K6_tum_5u_5" "9_K6_tum_5u" "11_K7_nor_5u" "13_K7_tum_5u" "7_K6_nor_5_200" "10_K6_tum_5_200" "12_K7_nor_5_200" "14_K7_tum_5_200")
+    min_frag="140"
+    max_frag="160"
+    limit=20
+    max_frag_dist=1100
 fi
 
 # set global files/dir
@@ -52,14 +70,30 @@ if [[ $test == "Y" ]]; then
 fi
 
 if [[ $flag == "check_samples" ]]; then
-    for f in ${sample_list[@]}; do
-        echo "**$f**"
-        
+    for f in ${sample_list[@]}; do        
         analysis_dir="$base_dir/$f/results"
         bed_dir="$analysis_dir/03_aligned/02_bed"
         mapped_bed="$bed_dir/$f.hg19.mapped.bed"
 
-        ls -la $mapped_bed
+        message=`ls -la $mapped_bed`
+
+        if [[ $message == *"ls:"* ]]; then
+            echo "Check sample: $f"
+            echo "---$mapped_bed"
+        else
+            echo "Sample clear: $f"
+        fi
+
+        # set dir
+        analysis_dir="$base_dir/$f/results"
+        script_dir="$base_dir/$f/scripts"
+        tmp_dir="$analysis_dir/a_sat_tmp"
+        bed_dir="$analysis_dir/03_aligned/02_bed"
+        dyad_dir="$analysis_dir/04_dyads/01_DYADs"
+        hist_dir="$analysis_dir/04_dyads/02_histograms"
+        csv_dir="$analysis_dir/04_dyads/03_CSV"
+        dir_list=($analysis_dir $tmp_dir $bed_dir $dyad_dir $hist_dir $csv_dir)
+        for pd in ${dir_list[@]}; do if [[ ! -d $pd ]]; then mkdir -p $pd; fi; done
     done
 fi
 
@@ -69,13 +103,13 @@ if [[ $flag == "create_sh" ]]; then
 
         # set dir
         analysis_dir="$base_dir/$f/results"
+        script_dir="$base_dir/$f/scripts"
+
         tmp_dir="$analysis_dir/a_sat_tmp"
         bed_dir="$analysis_dir/03_aligned/02_bed"
         dyad_dir="$analysis_dir/04_dyads/01_DYADs"
         hist_dir="$analysis_dir/04_dyads/02_histograms"
         csv_dir="$analysis_dir/04_dyads/03_CSV"
-        script_dir="$base_dir/$f/scripts"
-        if [[ ! -d $tmp_dir ]]; then mkdir -p $tmp_dir; fi
 
         # set files
         sh_file="$script_dir/$f.asatsremoved.$min_frag-$max_frag.lim${limit}.sh"
